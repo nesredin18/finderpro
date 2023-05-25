@@ -13,7 +13,7 @@ class account(AbstractUser):
     email=models.EmailField(unique=True,null=True)
     p_number=models.IntegerField(null=True)
     adress=models.CharField(max_length=100,blank=True,null=True)
-    user_type=models.ForeignKey(user_type,null=True, on_delete=models.SET_NULL,default=3)
+    user_type=models.ForeignKey(user_type,null=True, on_delete=models.SET_NULL)
 
     reg = [
         ("AM", "Amhara"),
@@ -38,7 +38,7 @@ class account(AbstractUser):
     is_verfied=models.BooleanField(default=False)
 
     USERNAME_FIELD='email'
-    REQUIRED_FIELDS=[]
+    REQUIRED_FIELDS=['username']
     EMAIL_FIELD='email'
     @property
     def token(self):

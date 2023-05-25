@@ -83,15 +83,22 @@ WSGI_APPLICATION = 'Finder1.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+#DATABASES = {
+ #   'default': {
+  #      'ENGINE': 'django.db.backends.postgresql',
+   #     'NAME': 'finderdata',
+    #    'USER': 'nas',
+     #   'PASSWORD': 'password',
+      #  'HOST': 'localhost',
+       # 'PORT': '',
+    #}
+#}
+
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'finderdata',
-        'USER': 'nas',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
+   'default': dj_database_url.parse('postgres://nesru:JjFGbqPMCkOqGYpD302r2h3DXlmLbXmY@dpg-chngno1mbg5577lg8ndg-a.oregon-postgres.render.com/finderdatabase_wzhh')
+
 }
 
 # Password validation
