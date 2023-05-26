@@ -23,7 +23,7 @@ class account(AbstractUser):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci = [
         ("BD", "Bahrdar"),
@@ -33,7 +33,7 @@ class account(AbstractUser):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Ababa",
+        default="Addis Ababa",max_length=100
     )
     is_verfied=models.BooleanField(default=False)
 
@@ -71,7 +71,7 @@ class lost_P(models.Model):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci= [
         ("BD", "Bahrdar"),
@@ -81,7 +81,7 @@ class lost_P(models.Model):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     cloth=models.TextField()
     mark=models.TextField()
@@ -108,7 +108,7 @@ class found_P(models.Model):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci= [
         ("BD", "Bahrdar"),
@@ -118,7 +118,7 @@ class found_P(models.Model):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     gender=[
         ("m","male"),
@@ -149,7 +149,7 @@ class wanted_p(models.Model):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci= [
         ("BD", "Bahrdar"),
@@ -159,7 +159,7 @@ class wanted_p(models.Model):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     armed = "armed"
     Not_armed = "not_armed"
@@ -169,7 +169,7 @@ class wanted_p(models.Model):
     ]
     condition = models.CharField(
         choices=status,
-        default=Not_armed,
+        default=Not_armed,max_length=100
     )
     post_date=models.DateTimeField(auto_now_add=True,null=True)
     cloth=models.TextField()
@@ -192,7 +192,7 @@ class matched_p(models.Model):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci= [
         ("BD", "Bahrdar"),
@@ -202,7 +202,7 @@ class matched_p(models.Model):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     correct = "correct"
     Not_correct = "not_correct"
@@ -212,7 +212,7 @@ class matched_p(models.Model):
     ]
     condition = models.CharField(
         choices=status,
-        default=Not_correct,
+        default=Not_correct,max_length=100
     )
     post_date=models.DateTimeField(auto_now_add=True,null=True)
 class item_type(models.Model):
@@ -231,7 +231,7 @@ class found_i(models.Model):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci= [
         ("BD", "Bahrdar"),
@@ -241,7 +241,7 @@ class found_i(models.Model):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     detail=models.TextField()
     post_date=models.DateTimeField(auto_now_add=True,null=True)
@@ -258,7 +258,7 @@ class lost_i(models.Model):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci= [
         ("BD", "Bahrdar"),
@@ -268,7 +268,7 @@ class lost_i(models.Model):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     serial_n=models.TextField()
     detail=models.TextField()
@@ -285,7 +285,7 @@ class matched_i(models.Model):
     ]
     region = models.CharField(
         choices=reg,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     ci= [
         ("BD", "Bahrdar"),
@@ -295,7 +295,7 @@ class matched_i(models.Model):
     ]
     city = models.CharField(
         choices=ci,
-        default="Addis Abeba",
+        default="Addis Abeba",max_length=100
     )
     lost_id=models.ForeignKey(lost_i,on_delete=models.SET_NULL,null=True)
     correct = "correct"
@@ -306,6 +306,6 @@ class matched_i(models.Model):
     ]
     condition = models.CharField(
         choices=status,
-        default=Not_correct,
+        default=Not_correct,max_length=100
     )
     post_date=models.DateTimeField(auto_now_add=True,null=True)
