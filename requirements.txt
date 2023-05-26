@@ -9,7 +9,6 @@ djangorestframework-simplejwt
 importlib-metadata
 Markdown
 Pillow
-pkg_resources
 psycopg
 psycopg-binary
 psycopg2
