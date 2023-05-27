@@ -1,11 +1,14 @@
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.mail import send_mail
 import math, random
+from .permisions import IsOwner,Istype
 from .utils import Util
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes
 from django.contrib.auth.decorators import login_required
 from drf_multiple_model.pagination import MultipleModelLimitOffsetPagination
 from rest_framework.response import Response
@@ -13,7 +16,7 @@ import json
 import jwt
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import status
+from rest_framework import status, permissions
 from django.contrib.auth.hashers import make_password
 from drf_multiple_model.views import FlatMultipleModelAPIView
 from .serializer import lostpSerializer,lostiSerializer,foundiSerializer,foundpSerializer,accountSerializer,registerserializer,loginSerializer,wantedpSerializer
@@ -31,6 +34,13 @@ def getRoutes(request):
 
     },
     {
+        'endpoint':'/thread/found-item',
+        'method':'GET',
+        'body':None,
+        'description':'returns All found item'
+    }
+    ,
+    {
         'endpoint':'/thread/lost-person',
         'method':'GET',
         'body':None,
@@ -38,19 +48,127 @@ def getRoutes(request):
 
     },
     {
-        'endpoint':'/thread/found-item',
-        'method':'GET',
-        'body':None,
-        'description':'returns All found item'
-
-    },
-    {
         'endpoint':'/thread/found-person',
         'method':'GET',
         'body':None,
-        'description':'returns All found person'
-
-    },]
+        'description':'returns All found person'    
+    },
+    {
+        'endpoint':'/thread/wanted-person',
+        'method':'GET',
+        'body':None,
+        'description':'returns All wanted person'
+    },
+    {
+        'endpoint':'/thread/post-lost-item',
+        'method':'POST',
+        'body':None,
+        'description':'creates a lost item'
+    }
+    ,
+    {
+        'endpoint':'/thread/post-found-item',
+        'method':'POST',
+        'body':None,
+        'description':'creates a found item'
+    },
+    {
+        'endpoint':'/thread/post-lost-person',
+        'method':'POST',
+        'body':None,
+        'description':'creates a lost person'
+    },
+    {
+        'endpoint':'/thread/post-found-person',
+        'method':'POST',
+        'body':None,
+        'description':'creates a found person'
+    },
+    {
+        'endpoint':'/thread/post-wanted-person',
+        'method':'POST',
+        'body':None,
+        'description':'creates a wanted person'
+    },
+    {
+        'endpoint':'/thread/delete-lost-item',
+        'method':'DELETE',
+        'body':None,
+        'description':'deletes a lost item'
+    },
+    {   
+        'endpoint':'/thread/delete-found-item',
+        'method':'DELETE',
+        'body':None,
+        'description':'deletes a found item'
+    },
+    {
+        'endpoint':'/thread/delete-lost-person',
+        'method':'DELETE',
+        'body':None,
+        'description':'deletes a lost person'
+    },
+    {
+        'endpoint':'/thread/delete-found-person',
+        'method':'DELETE',
+        'body':None,
+        'description':'deletes a found person'
+    },
+    {
+        'endpoint':'/thread/delete-wanted-person',
+        'method':'DELETE',
+        'body':None,
+        'description':'deletes a wanted person'
+    },
+    {
+        'endpoint':'/thread/update-lost-item',
+        'method':'PUT',
+        'body':None,
+        'description':'updates a lost item'
+    },
+    {
+        'endpoint':'/thread/update-found-item',
+        'method':'PUT',
+        'body':None,
+        'description':'updates a found item'
+    },
+    {
+        'endpoint':'/thread/update-lost-person',
+        'method':'PUT',
+        'body':None,
+        'description':'updates a lost person'
+    },
+    {
+        'endpoint':'/thread/update-found-person',
+        'method':'PUT',
+        'body':None,
+        'description':'updates a found person'
+    },
+    {
+        'endpoint':'/thread/update-wanted-person',
+        'method':'PUT',
+        'body':None,
+        'description':'updates a wanted person'
+    },
+    {
+        'endpoint':'/thread/register',
+        'method':'POST',
+        'body':None,
+        'description':'registers a user'
+    },
+    {
+        'endpoint':'/thread/login',
+        'method':'POST',
+        'body':None,
+        'description':'logs in a user'
+    },
+    {
+        'endpoint':'/thread/logout',
+        'method':'POST',
+        'body':None,
+        'description':'logs out a user'
+    },
+    ]
 
     return Response(routes)
 @api_view(['GET'])
@@ -85,7 +203,7 @@ def updatelostp(request, pk):
 def createlostp(request):
     data= request.data
     lostp=lost_P.objects.create(
-        user= request.user.email,
+        user= account.objects.get(id=1),
         first_n= data['first_name'],
         last_n=data['last_name'],
         age= data['age'],
@@ -135,7 +253,7 @@ def updatefoundp(request, pk):
 def createfoundp(request):
     data= request.data
     lostp=found_P.objects.create(
-        user= request.user.email,
+        user= account.objects.get(id=1),
         first_n= data['first_name'],
         last_n=data['last_name'],
         age= data['age'],
@@ -185,7 +303,7 @@ def updatelosti(request, pk):
 def createlosti(request):
     data= request.data
     losti=lost_i.objects.create(
-        user= request.user.email,
+        user= account.objects.get(id=1),
         serial_n= data['serial_n'],
         region=data['region'],
         city= data['city'],
@@ -230,7 +348,7 @@ def updatefoundi(request, pk):
 def createfoundi(request):
     data= request.data
     foundi=found_i.objects.create(
-        user= request.user.email,
+        user=account.objects.get(id=1),
         serial_n= data['serial_n'],
         region=data['region'],
         city= data['city'],
@@ -273,7 +391,8 @@ def updatewantedp(request, pk):
 def createwantedp(request):
     data= request.data
     lostp=wanted_p.objects.create(
-        user= request.user.email,
+        #user= request.user.email,
+        user= account.objects.get(id=1),
         first_n= data['first_name'],
         last_n=data['last_name'],
         age= data['age'],
@@ -355,6 +474,8 @@ def VerifyEmail(request):
     try:
         payload =jwt.decode(token,settings.SECRET_KEY)
         user=account.objects.get(id=payload['user_id'])
+        if user.is_verfied:
+            return Response({'email':'already activated'})
         if not user.is_verfied:
             user.is_verfied=True
             user.save()
@@ -363,8 +484,22 @@ def VerifyEmail(request):
         return Response({'error':'expired'})
     except jwt.exceptions.DecodeError as identifier:
         return Response({'error':'invalid token'})
-        
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated,Istype])
+def getwantedperson(request):
+    queryset=wanted_p.objects.all()
+    lostp=wanted_p.objects.all()
+    serializer=wantedpSerializer(lostp, many=True)
+    return Response(serializer.data)
+    #def perform_create(self, serializer):
+     #   return serializer.save(user=self.request.user)
+    #def get_queryset(self):
+     #   return self.queryset.filter(user=self.request.user)
     
+    
+  
 def generateOTP() :
      digits = "0123456789"
      OTP = ""

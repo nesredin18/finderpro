@@ -15,26 +15,10 @@ class account(AbstractUser):
     adress=models.CharField(max_length=100,blank=True,null=True)
     user_type=models.ForeignKey(user_type,null=True, on_delete=models.SET_NULL)
 
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci = [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Ababa",max_length=100
-    )
+
+    region = models.TextField(null=True)
+
+    city = models.TextField(null=True)
     is_verfied=models.BooleanField(default=False)
 
     USERNAME_FIELD='email'
@@ -55,166 +39,70 @@ class person_type(models.Model):
 class lost_P(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
-    first_n=models.CharField(max_length=100)
-    last_n=models.CharField(max_length=100)
-    age=models.IntegerField()
-    height=models.IntegerField()
-    gender=[
-        ("m","male"),
-        ("f","female"),
-    ]
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci= [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Abeba",max_length=100
-    )
-    cloth=models.TextField()
-    mark=models.TextField()
-    detail=models.TextField()
-    adress=models.CharField(max_length=100)
-    status=[
-        ("h","healthy"),
-        ("not_h","Not healthy")
-    ]
+    first_n=models.CharField(max_length=100,null=True,blank=True)
+    last_n=models.CharField(max_length=100,null=True,blank=True)
+    age=models.IntegerField(null=True,blank=True)
+    height=models.IntegerField(null=True,blank=True)
+    gender=models.TextField(null=True,blank=True)
+
+    region = models.TextField(null=True,blank=True)
+
+    city = models.TextField(null=True,blank=True)
+    cloth=models.TextField(null=True,blank=True)
+    mark=models.TextField(null=True,blank=True)
+    detail=models.TextField(null=True,blank=True)
+    adress=models.CharField(max_length=100,null=True,blank=True)
     p_type=models.ForeignKey(person_type,null=True,on_delete=models.SET_NULL)
     post_date=models.DateTimeField(auto_now_add=True,null=True)
+    lost_date=models.DateTimeField(null=True,blank=True)
+    update_date=models.DateTimeField(auto_now=True,null=True)
 class found_P(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
-    first_n=models.CharField(max_length=100)
-    last_n=models.CharField(max_length=100)
-    age=models.IntegerField()
-    height=models.IntegerField()
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci= [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Abeba",max_length=100
-    )
-    gender=[
-        ("m","male"),
-        ("f","female"),
-    ]
-    cloth=models.TextField()
-    mark=models.TextField()
-    detail=models.TextField()
-    adress=models.CharField(max_length=100)
-    status=[
-        ("h","healthy"),
-        ("not_h","Not healthy")
-    ]
-    post_date=models.DateTimeField(auto_now_add=True,null=True)
+    first_n=models.CharField(max_length=100,null=True,blank=True)
+    last_n=models.CharField(max_length=100,null=True,blank=True)
+    age=models.IntegerField(null=True,blank=True)
+    height=models.IntegerField(null=True,blank=True)
+    gender=models.TextField(null=True,blank=True)
+
+    region = models.TextField(null=True,blank=True)
+
+    city = models.TextField(null=True,blank=True)
+    cloth=models.TextField(null=True,blank=True)
+    mark=models.TextField(null=True,blank=True)
+    detail=models.TextField(null=True,blank=True)
+    adress=models.CharField(max_length=100,null=True,blank=True)
     p_type=models.ForeignKey(person_type,null=True,on_delete=models.SET_NULL)
+    post_date=models.DateTimeField(auto_now_add=True,null=True)
+    lost_date=models.DateTimeField(null=True,blank=True)
+    update_date=models.DateTimeField(auto_now=True,null=True)
 class wanted_p(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
-    first_n=models.CharField(max_length=100)
-    last_n=models.CharField(max_length=100)
-    age=models.IntegerField()
-    height=models.IntegerField()
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci= [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Abeba",max_length=100
-    )
-    armed = "armed"
-    Not_armed = "not_armed"
-    status = [
-        (armed, "Armed"),
-        (Not_armed, "Not Armed"),
-    ]
-    condition = models.CharField(
-        choices=status,
-        default=Not_armed,max_length=100
-    )
+    first_n=models.CharField(max_length=100,null=True,blank=True)
+    last_n=models.CharField(max_length=100,null=True,blank=True)
+    age=models.IntegerField(null=True,blank=True)
+    height=models.IntegerField(null=True,blank=True)
+
+    region = models.TextField(null=True,blank=True)
+
+    city = models.TextField(null=True,blank=True)
+
+    condition = models.CharField(max_length=100,null=True,blank=True)
+    
     post_date=models.DateTimeField(auto_now_add=True,null=True)
-    cloth=models.TextField()
-    mark=models.TextField()
-    detail=models.TextField()
-    reason=models.TextField()
-    adress=models.CharField(max_length=100)
-    status=[
-        ("harm","Harmfull"),
-        ("not_harm","Not harmfull")
-    ]
+    lost_date=models.DateTimeField(null=True,blank=True)
+    update_date=models.DateTimeField(auto_now=True,null=True)
+    cloth=models.TextField(null=True,blank=True)
+    mark=models.TextField(null=True,blank=True)
+    detail=models.TextField(null=True,blank=True)
+    reason=models.TextField(null=True,blank=True)
+    adress=models.CharField(max_length=100,null=True,blank=True)
+
 class matched_p(models.Model):
-    found_id=models.ForeignKey(found_P,on_delete=models.SET_NULL,null=True)
-    lost_id=models.ForeignKey(lost_P,on_delete=models.SET_NULL,null=True)
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci= [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Abeba",max_length=100
-    )
-    correct = "correct"
-    Not_correct = "not_correct"
-    status = [
-        (correct, "Armed"),
-        (Not_correct, "Not Armed"),
-    ]
-    condition = models.CharField(
-        choices=status,
-        default=Not_correct,max_length=100
-    )
-    post_date=models.DateTimeField(auto_now_add=True,null=True)
+    found_id=models.ForeignKey(found_P,on_delete=models.SET_NULL,null=True,blank=True)
+    lost_id=models.ForeignKey(lost_P,on_delete=models.SET_NULL,null=True,blank=True)
+    condition = models.TextField(null=True,blank=True)
 class item_type(models.Model):
     type=models.CharField(max_length=100)
     def __str__(self):
@@ -222,90 +110,32 @@ class item_type(models.Model):
 class found_i(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
-    serial_n=models.TextField()
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci= [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Abeba",max_length=100
-    )
-    detail=models.TextField()
-    post_date=models.DateTimeField(auto_now_add=True,null=True)
-    adress=models.CharField(max_length=100)
+    serial_n=models.TextField(null=True,blank=True)
+ 
+    region = models.TextField(null=True,blank=True)
+
+    city = models.TextField(null=True,blank=True)
+    detail=models.TextField(null=True,blank=True)
+    post_date=models.DateTimeField(auto_now_add=True,null=True,blank=True)
+    adress=models.CharField(max_length=100,null=True,blank=True)
     i_type=models.ForeignKey(item_type,null=True,on_delete=models.SET_NULL)
+    lost_date=models.DateTimeField(null=True,blank=True)
+    update_date=models.DateTimeField(auto_now=True,null=True,blank=True)
 class lost_i(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci= [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Abeba",max_length=100
-    )
-    serial_n=models.TextField()
-    detail=models.TextField()
-    post_date=models.DateTimeField(auto_now_add=True,null=True)
-    adress=models.CharField(max_length=100)
+    serial_n=models.TextField(null=True,blank=True)
+ 
+    region = models.TextField(null=True,blank=True)
+
+    city = models.TextField(null=True,blank=True)
+    detail=models.TextField(null=True,blank=True)
+    post_date=models.DateTimeField(auto_now_add=True,null=True,blank=True)
+    adress=models.CharField(max_length=100,null=True,blank=True)
     i_type=models.ForeignKey(item_type,null=True,on_delete=models.SET_NULL)
+    lost_date=models.DateTimeField(null=True,blank=True)
+    update_date=models.DateTimeField(auto_now=True,null=True,blank=True)
 class matched_i(models.Model):
     found_id=models.ForeignKey(found_i,on_delete=models.SET_NULL,null=True)
-    reg = [
-        ("AM", "Amhara"),
-        ("ORO", "Oromia"),
-        ("AA", "Addis Abeba"),
-        ("SUMA", "Sumlia"),
-    ]
-    region = models.CharField(
-        choices=reg,
-        default="Addis Abeba",max_length=100
-    )
-    ci= [
-        ("BD", "Bahrdar"),
-        ("AD", "Adama"),
-        ("AA", "Addis Ababa"),
-        ("JJ", "Jigjiga"),
-    ]
-    city = models.CharField(
-        choices=ci,
-        default="Addis Abeba",max_length=100
-    )
     lost_id=models.ForeignKey(lost_i,on_delete=models.SET_NULL,null=True)
-    correct = "correct"
-    Not_correct = "not_correct"
-    status = [
-        (correct, "Correct match"),
-        (Not_correct, "Not Correct Match"),
-    ]
-    condition = models.CharField(
-        choices=status,
-        default=Not_correct,max_length=100
-    )
-    post_date=models.DateTimeField(auto_now_add=True,null=True)
+    condition = models.TextField(null=True,blank=True)

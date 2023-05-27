@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -49,6 +49,10 @@ INSTALLED_APPS = [
     'report',
     'drf_multiple_model',
 ]
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -85,23 +89,23 @@ WSGI_APPLICATION = 'Finder1.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-#DATABASES = {
- #   'default': {
-  #      'ENGINE': 'django.db.backends.postgresql',
-   #     'NAME': 'finderdata',
-    #    'USER': 'nas',
-     #   'PASSWORD': 'password',
-      #  'HOST': 'localhost',
-       # 'PORT': '',
-    #}
-#}
-
-import dj_database_url
-
 DATABASES = {
-   'default': dj_database_url.parse('postgres://nesru:JjFGbqPMCkOqGYpD302r2h3DXlmLbXmY@dpg-chngno1mbg5577lg8ndg-a.oregon-postgres.render.com/finderdatabase_wzhh')
-
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'finderdata',
+        'USER': 'nas',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
 }
+
+#import dj_database_url
+
+#DATABASES = {
+ #  'default': dj_database_url.parse('postgres://nesru:JjFGbqPMCkOqGYpD302r2h3DXlmLbXmY@dpg-chngno1mbg5577lg8ndg-a.oregon-postgres.render.com/finderdatabase_wzhh')
+
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

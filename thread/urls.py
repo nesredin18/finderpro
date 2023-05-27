@@ -42,6 +42,7 @@ urlpatterns = [
     
     path('log/',views.getThread),
     path('send/',views.send_otp),
+    path('token/',views.getwantedperson),
     
     
 ]
