@@ -26,6 +26,7 @@ class foundiSerializer(ModelSerializer):
         model=found_i
         fields='__all__'
 class accountSerializer(ModelSerializer):
+    password=serializers.CharField(max_length=128,write_only=True)
     class Meta:
         model=account
         fields='__all__'

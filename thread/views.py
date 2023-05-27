@@ -497,8 +497,41 @@ def getwantedperson(request):
      #   return serializer.save(user=self.request.user)
     #def get_queryset(self):
      #   return self.queryset.filter(user=self.request.user)
-    
-    
+  
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated,IsOwner])
+def getaccount(request):
+    user= request.user.id
+    losti=account.objects.get(id=user)
+    serializer=accountSerializer(losti, many=False)
+    return Response(serializer.data)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated,IsOwner])
+def getaccountid(request,pk):
+    losti=account.objects.get(id=pk)
+    serializer1=accountSerializer(losti, many=False)
+    return Response(serializer1.data)
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated,IsOwner])
+def deleteaccount(request):
+    user=request.user.id
+    losti=lost_i.objects.get(id=user)
+    serializer= accountSerializer(losti,many=False)
+    losti.delete()
+    return Response("succesfully deleted")
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
+def updateaccount(request):
+    #r=request
+    #getlostpid(r,pk)
+    id=request.user.id
+    data= request.data
+    losti=account.objects.get(id=pk)
+    serializer= account(losti, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
   
 def generateOTP() :
      digits = "0123456789"
