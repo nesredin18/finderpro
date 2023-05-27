@@ -199,7 +199,6 @@ def updatelostp(request, pk):
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
-@login_required
 @api_view(['POST'])
 def createlostp(request):
     data= request.data
@@ -249,7 +248,6 @@ def updatefoundp(request, pk):
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
-@login_required
 @api_view(['POST'])
 def createfoundp(request):
     data= request.data
@@ -299,7 +297,7 @@ def updatelosti(request, pk):
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
-@login_required
+
 @api_view(['POST'])
 def createlosti(request):
     data= request.data
@@ -344,7 +342,7 @@ def updatefoundi(request, pk):
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
-@login_required
+
 @api_view(['POST'])
 def createfoundi(request):
     data= request.data
@@ -387,7 +385,7 @@ def updatewantedp(request, pk):
     if serializer.is_valid():
         serializer.save()
     return Response(serializer.data)
-@login_required
+
 @api_view(['POST'])
 def createwantedp(request):
     data= request.data
@@ -436,21 +434,6 @@ def loginAccount(request):
 def logoutAccount(request):
     logout(request)
     return Response("succefull logout")
-@api_view(['GET'])
-def getThread(request):
-    data= request.data
-    #email= data['email']
-    #password=data['password']
-    #user=authenticate(request,email=email,password=password)
-    if request.user.is_authenticated:
-        ci=request.user.city
-        acc= found_i.objects.get(city="AA",many=True)
-        serializer=foundiSerializer(acc)
-        return Response(serializer.data)
-    else:
-        acc= found_i.objects.all()
-        serializer=foundiSerializer(acc, many=True)
-        return Response(serializer.data)
 @api_view(['POST'])
 def registeruser(request):
     user=request.data
@@ -488,19 +471,6 @@ def VerifyEmail(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated,Istype])
-def getwantedperson(request):
-    queryset=wanted_p.objects.all()
-    lostp=wanted_p.objects.all()
-    serializer=wantedpSerializer(lostp, many=True)
-    return Response(serializer.data)
-    #def perform_create(self, serializer):
-     #   return serializer.save(user=self.request.user)
-    #def get_queryset(self):
-     #   return self.queryset.filter(user=self.request.user)
-  
-
-@api_view(['GET'])
 @permission_classes([IsAuthenticated,IsOwner])
 def getaccount(request):
     user= request.user.id
@@ -534,6 +504,9 @@ def updateaccount(request):
         serializer.save()
         return Response(serializer.data)
     return Response("there is error")
+
+
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated,IsOwner])
 def forgetpassword(request):
@@ -570,6 +543,9 @@ def changepassword(request):
         serializer.save()
         return Response("succusfully changed")
     return Response("there is error")
+
+
+ 
   
 def generateOTP() :
      digits = "0123456789"
