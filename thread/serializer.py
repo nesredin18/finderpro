@@ -30,6 +30,17 @@ class accountSerializer(ModelSerializer):
     class Meta:
         model=account
         fields='__all__'
+class changeaccountserializer(ModelSerializer):
+    class Meta:
+        model=account
+        fields=('first_name','last_name',
+                'adress','p_number','city','region'
+                )
+class changepserializer(ModelSerializer):
+    password=serializers.CharField(max_length=128,write_only=True)
+    class Meta:
+        model=account
+        fields=('password',)
 class registerserializer(ModelSerializer):
     password= serializers.CharField(max_length=128,min_length=8,write_only=True)
     class Meta:

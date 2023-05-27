@@ -39,6 +39,14 @@ urlpatterns = [
     path('register/',views.registeruser),
     path('verify-email/',views.VerifyEmail,name='emailverify'),
     
+
+    path('account/',views.getaccount),
+    path('update-account',views.updateaccount),
+    path('delete/',views.deleteaccount),
+    path('account/<str:pk>/',views.getaccountid),
+    path('forget-password/',views.forgetpassword),
+    path('change-password/',views.changepassword),
+    
     
     path('log/',views.getThread),
     path('send/',views.send_otp),

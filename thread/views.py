@@ -17,9 +17,10 @@ import jwt
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status, permissions
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
 from drf_multiple_model.views import FlatMultipleModelAPIView
-from .serializer import lostpSerializer,lostiSerializer,foundiSerializer,foundpSerializer,accountSerializer,registerserializer,loginSerializer,wantedpSerializer
+from .serializer import lostpSerializer,lostiSerializer,foundiSerializer,foundpSerializer,accountSerializer,registerserializer,loginSerializer,wantedpSerializer,changepserializer,changeaccountserializer
 from .models import lost_P,found_P,lost_i,found_i,account,person_type,item_type,wanted_p
 from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.contrib.auth import authenticate,login,logout
@@ -151,19 +152,19 @@ def getRoutes(request):
         'description':'updates a wanted person'
     },
     {
-        'endpoint':'/thread/register',
+        'endpoint':'/register',
         'method':'POST',
         'body':None,
         'description':'registers a user'
     },
     {
-        'endpoint':'/thread/login',
+        'endpoint':'/login',
         'method':'POST',
         'body':None,
         'description':'logs in a user'
     },
     {
-        'endpoint':'/thread/logout',
+        'endpoint':'/logout',
         'method':'POST',
         'body':None,
         'description':'logs out a user'
@@ -525,13 +526,50 @@ def deleteaccount(request):
 def updateaccount(request):
     #r=request
     #getlostpid(r,pk)
-    id=request.user.id
+    pk=request.user.id
     data= request.data
     losti=account.objects.get(id=pk)
-    serializer= account(losti, data=request.data)
+    serializer= changeaccountserializer(losti, data=request.data)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data)
+        return Response(serializer.data)
+    return Response("there is error")
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
+def forgetpassword(request):
+    #r=request
+    #getlostpid(r,pk)
+    pk=request.user.id
+    data= request.data
+    data['password']=make_password(data['password'])
+    losti=account.objects.get(id=pk)
+    serializer= changepserializer(losti, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response("succusfully changed")
+    return Response("there is error")
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
+def changepassword(request):
+    #r=request
+    #getlostpid(r,pk)
+    pk=request.user.id
+    data= request.data
+    oldp=data['old_password']
+    oldpas=request.user.password
+
+    print(oldp)
+    print(oldpas)
+    if not check_password(oldp,oldpas):
+        return Response("pleas enter correct password")
+    data['password']=make_password(data['password'])
+    losti=account.objects.get(id=pk)
+    serializer= changepserializer(losti, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response("succusfully changed")
+    return Response("there is error")
   
 def generateOTP() :
      digits = "0123456789"
