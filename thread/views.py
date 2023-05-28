@@ -571,7 +571,40 @@ def changepassword(request):
 
 @api_view(['GET'])
 def getThread(request):
-    lostp=lost_P.objects.all()
+    if request.user.is_authenticated:
+        reg=request.user.region
+        ci=request.user.city
+        lostp=lost_P.objects.filter(region=reg)
+        losti=lost_i.objects.filter(region=reg)
+        foundp=found_P.objects.filter(region=reg)
+        foundi=found_i.objects.filter(region=reg)
+        lostpr=lost_P.objects.filter(city=ci)
+        lostir=lost_i.objects.filter(city=ci)
+        foundpr=found_P.objects.filter(city=ci)
+        foundir=found_i.objects.filter(city=ci)
+        lostpp=lost_P.objects.all().exclude(region=reg).exclude(city=ci)
+        lostip=lost_i.objects.all().exclude(region=reg).exclude(city=ci)
+        foundpp=found_P.objects.all().exclude(region=reg).exclude(city=ci)
+        foundip=found_i.objects.all().exclude(region=reg).exclude(city=ci)
+        seria1=lostpSerializer(lostp,many=True)
+        seria2=lostiSerializer(losti,many=True)
+        seria3=foundpSerializer(foundp,many=True)
+        seria4=foundiSerializer(foundi,many=True)
+        seria5=lostpSerializer(lostpr,many=True)
+        seria6=lostiSerializer(lostir,many=True)
+        seria7=foundpSerializer(foundpr,many=True)
+        seria8=foundiSerializer(foundir,many=True)
+        seria9=lostpSerializer(lostpp,many=True)
+        seria10=lostiSerializer(lostip,many=True)
+        seria11=foundpSerializer(foundpp,many=True)
+        seria12=foundiSerializer(foundip,many=True)
+        result1=seria5.data+seria6.data+seria7.data+seria8.data
+        result2=seria1.data+seria2.data+seria3.data+seria4.data
+        result3=seria9.data+seria10.data+seria11.data+seria12.data
+        result=result1+result2+result3
+        return Response(result)
+
+    lostp=found_i.objects.all()
     losti=lost_i.objects.all()
     foundp=found_P.objects.all()
     foundi=found_i.objects.all()
