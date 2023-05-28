@@ -18,8 +18,6 @@ from rest_framework import status, permissions
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
 from drf_multiple_model.views import FlatMultipleModelAPIView
-from .serializer import lostpSerializer,lostiSerializer,foundiSerializer,foundpSerializer,accountSerializer,registerserializer,loginSerializer,wantedpSerializer,changepserializer,changeaccountserializer
-from .models import lost_P,found_P,lost_i,found_i,account,person_type,item_type,wanted_p
 from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.contrib.auth import authenticate,login,logout
 from rest_framework.exceptions import AuthenticationFailed
