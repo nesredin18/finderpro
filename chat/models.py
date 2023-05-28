@@ -6,5 +6,4 @@ class message(models.Model):
     sender=models.ForeignKey(account, null=True,on_delete=models.SET_NULL,related_name='sender')
     rec=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='reciever')
     content=models.TextField()
-    date=models.DateField(auto_now=True)
-
+    date=models.DateField(auto_now_add=True)
