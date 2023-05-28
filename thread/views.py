@@ -183,14 +183,22 @@ def getlostp(request):
     serializer=lostpSerializer(lostp, many=True)
     return Response(serializer.data)
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated,IsOwner])
 def deletelostp(request,pk):
+    obj=lost_P.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     lostp=lost_P.objects.get(id=pk)
     data= lostp
     serializer= lostpSerializer(data,many=False)
     lostp.delete()
-    return Response(serializer.data)
+    return Response("succusfully deleted")
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
 def updatelostp(request, pk):
+    obj=lost_P.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     #r=request
     #getlostpid(r,pk)
     data= request.data
@@ -198,26 +206,18 @@ def updatelostp(request, pk):
     serializer= lostpSerializer(lostp, data=request.data)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data)
+        return Response(serializer.data)
+    return Response("there is error")
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def createlostp(request):
-    data= request.data
-    lostp=lost_P.objects.create(
-        user= account.objects.get(id=1),
-        first_n= data['first_name'],
-        last_n=data['last_name'],
-        age= data['age'],
-        height=data['height'],
-        cloth=data['cloth'],
-        mark=data['mark'],
-        detail=data['detail'],
-        adress=data['address'],
-        region=data['region'],
-        city=data['city'],
-        p_type=person_type.objects.get(id=1),
-    )
-    serializer= lostpSerializer(lostp,many=False)
-    return Response(serializer.data)
+    data=request.data
+    data['user']=request.user.id
+    serializer=lostpSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response((serializer.data))
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -232,14 +232,22 @@ def getfoundpid(request,pk):
     serializer1=foundpSerializer(foundP, many=False)
     return Response(serializer1.data)
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated,IsOwner])
 def deletefoundp(request,pk):
+    obj=found_P.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     foundp=found_P.objects.get(id=pk)
     data= foundp
     serializer= foundpSerializer(data,many=False)
     foundp.delete()
     return Response(serializer.data)
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
 def updatefoundp(request, pk):
+    obj=found_P.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     #r=request
     #getlostpid(r,pk)
     data= request.data
@@ -249,24 +257,15 @@ def updatefoundp(request, pk):
         serializer.save()
     return Response(serializer.data)
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def createfoundp(request):
-    data= request.data
-    lostp=found_P.objects.create(
-        user= account.objects.get(id=1),
-        first_n= data['first_name'],
-        last_n=data['last_name'],
-        age= data['age'],
-        height=data['height'],
-        cloth=data['cloth'],
-        mark=data['mark'],
-        detail=data['detail'],
-        adress=data['address'],
-        p_type=person_type.objects.get(id=1),
-        region= data['region'],
-        city= data['city'],
-    )
-    serializer= foundpSerializer(lostp,many=False)
-    return Response(serializer.data)
+    data=request.data
+    data['user']=request.user.id
+    serializer=foundpSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response((serializer.data))
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -276,19 +275,28 @@ def getlosti(request):
     serializer=lostiSerializer(losti, many=True)
     return Response(serializer.data)
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def getlostiid(request,pk):
     losti=lost_i.objects.get(id=pk)
     serializer1=lostiSerializer(losti, many=False)
     return Response(serializer1.data)
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated,IsOwner])
 def deletelosti(request,pk):
+    obj=lost_i.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     losti=lost_i.objects.get(id=pk)
     data= losti
     serializer= lostiSerializer(data,many=False)
     losti.delete()
     return Response(serializer.data)
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
 def updatelosti(request, pk):
+    obj=lost_i.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     #r=request
     #getlostpid(r,pk)
     data= request.data
@@ -299,19 +307,15 @@ def updatelosti(request, pk):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def createlosti(request):
-    data= request.data
-    losti=lost_i.objects.create(
-        user= account.objects.get(id=1),
-        serial_n= data['serial_n'],
-        region=data['region'],
-        city= data['city'],
-        detail=data['detail'],
-        adress=data['address'],
-        i_type=item_type.objects.get(id=1),
-    )
-    serializer= lostiSerializer(losti,many=False)
-    return Response(serializer.data)
+    data=request.data
+    data['user']=request.user.id
+    serializer=lostiSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response((serializer.data))
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -326,14 +330,22 @@ def getfoundiid(request,pk):
     serializer1=foundiSerializer(foundi, many=False)
     return Response(serializer1.data)
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated,IsOwner])
 def deletefoundi(request,pk):
+    obj=found_i.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     foundi=found_i.objects.get(id=pk)
     data= foundi
     serializer= foundiSerializer(data,many=False)
     foundi.delete()
     return Response(serializer.data)
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
 def updatefoundi(request, pk):
+    obj=found_i.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
     #r=request
     #getlostpid(r,pk)
     data= request.data
@@ -344,19 +356,15 @@ def updatefoundi(request, pk):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def createfoundi(request):
-    data= request.data
-    foundi=found_i.objects.create(
-        user=account.objects.get(id=1),
-        serial_n= data['serial_n'],
-        region=data['region'],
-        city= data['city'],
-        detail=data['detail'],
-        adress=data['address'],
-        i_type=item_type.objects.get(id=1),
-    )
-    serializer= foundiSerializer(foundi,many=False)
-    return Response(serializer.data)
+    data=request.data
+    data['user']=request.user.id
+    serializer=foundiSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response((serializer.data))
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def getwantedpid(request,pk):
@@ -369,14 +377,22 @@ def getwantedp(request):
     serializer=wantedpSerializer(lostp, many=True)
     return Response(serializer.data)
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated,Istype])
 def deletewantedp(request,pk):
+    obj=wanted_p.objects.get(id=pk)
+    if(request.user.id!=obj.user_id or request.user.user_type_id!=1):
+        return Response("you are not allowed")
     lostp=wanted_p.objects.get(id=pk)
     data= lostp
     serializer= wantedpSerializer(data,many=False)
     lostp.delete()
     return Response(serializer.data)
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated,Istype])
 def updatewantedp(request, pk):
+    obj=wanted_p.objects.get(id=pk)
+    if(request.user.id!=obj.user_id or request.user.user_type_id!=1):
+        return Response("you are not allowed")
     #r=request
     #getlostpid(r,pk)
     data= request.data
@@ -387,26 +403,17 @@ def updatewantedp(request, pk):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated,Istype])
 def createwantedp(request):
-    data= request.data
-    lostp=wanted_p.objects.create(
-        #user= request.user.email,
-        user= account.objects.get(id=1),
-        first_n= data['first_name'],
-        last_n=data['last_name'],
-        age= data['age'],
-        height=data['height'],
-        cloth=data['cloth'],
-        mark=data['mark'],
-        detail=data['detail'],
-        adress=data['address'],
-        region=data['region'],
-        city=data['city'],
-        reason=data['reason'],
-        condition=data['condition'],
-    )
-    serializer= wantedpSerializer(lostp,many=False)
-    return Response(serializer.data)
+    if(request.user.user_type_id!=1):
+        return Response("you are not allowed")
+    data=request.data
+    data['user']=request.user.id
+    serializer=wantedpSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response((serializer.data))
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -507,20 +514,38 @@ def updateaccount(request):
 
 
 
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated,IsOwner])
+@api_view(['POST'])
 def forgetpassword(request):
     #r=request
     #getlostpid(r,pk)
-    pk=request.user.id
-    data= request.data
-    data['password']=make_password(data['password'])
-    losti=account.objects.get(id=pk)
-    serializer= changepserializer(losti, data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response("succusfully changed")
-    return Response("there is error")
+    email=request.data['email']
+    user=account.objects.get(email=email)
+    if not user:
+        return Response("user not found")
+    token = RefreshToken.for_user(user).access_token
+    current_site=get_current_site(request).domain
+    relativeLink=reverse('resetpassword')
+    absurl='http://'+current_site+relativeLink+"?token="+str(token)
+    email_body='hi ' +user.username+'use link below to reset password \n'+absurl
+    data={'email_body':email_body,'to_email':user.email,'e_subject':'reset password'}
+    Util.send_email(data)
+    return Response("email sent")
+@api_view(['POST'])
+def resetpassword(request):
+    #r=request
+    #getlostpid(r,pk)
+    token=request.GET.get('token')
+    password=request.data['password']
+    try:
+        payload =jwt.decode(token,settings.SECRET_KEY)
+        user=account.objects.get(id=payload['user_id'])
+        user.set_password(password)
+        user.save()
+        return Response("password reset")
+    except jwt.ExpiredSignature as identifier:
+        return Response({'error':'expired'})
+    except jwt.exceptions.DecodeError as identifier:
+        return Response({'error':'invalid token'})
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated,IsOwner])
@@ -544,6 +569,18 @@ def changepassword(request):
         return Response("succusfully changed")
     return Response("there is error")
 
+@api_view(['GET'])
+def getThread(request):
+    lostp=lost_P.objects.all()
+    losti=lost_i.objects.all()
+    foundp=found_P.objects.all()
+    foundi=found_i.objects.all()
+    seria1=lostpSerializer(lostp,many=True)
+    seria2=lostiSerializer(losti,many=True)
+    seria3=foundpSerializer(foundp,many=True)
+    seria4=foundiSerializer(foundi,many=True)
+    result=seria1.data+seria2.data+seria3.data+seria4.data
+    return Response(result)
 
  
   

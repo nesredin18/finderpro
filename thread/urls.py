@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 urlpatterns = [
     path('', views.getRoutes),
-    path('thread/',views.getallth),
+    path('thread/',views.getThread),
     path('thread/lost-person', views.getlostp),
     path('thread/post-lost-person', views.createlostp),
     path('thread/update-lost-person/<str:pk>/', views.updatelostp),
@@ -44,13 +44,14 @@ urlpatterns = [
     path('update-account',views.updateaccount),
     path('delete/',views.deleteaccount),
     path('account/<str:pk>/',views.getaccountid),
-    path('forget-password/',views.forgetpassword),
+    path('forget-password/',views.forgetpassword,name='forgetpassword'),
+    path('reset-password/',views.resetpassword,name='resetpassword'),
     path('change-password/',views.changepassword),
     
     
-    path('log/',views.getThread),
+   # path('log/',views.getThread),
     path('send/',views.send_otp),
-    path('token/',views.getwantedperson),
+   # path('token/',views.getwantedperson),
     
     
 ]

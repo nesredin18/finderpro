@@ -9,32 +9,44 @@ class lostpSerializer(ModelSerializer):
     class Meta:
         model=lost_P
         fields='__all__'
+    def create(self, validated_data):
+        return lost_P.objects.create(**validated_data)
 class wantedpSerializer(ModelSerializer):
     class Meta:
         model=wanted_p
         fields='__all__'
+    def create(self, validated_data):
+        return wanted_p.objects.create(**validated_data)
 class foundpSerializer(ModelSerializer):
     class Meta:
         model=found_P
         fields='__all__'
+    def create(self, validated_data):
+        return found_P.objects.create(**validated_data)
 class lostiSerializer(ModelSerializer):
     class Meta:
         model=lost_i
         fields='__all__'
+    def create(self, validated_data):
+        return lost_i.objects.create(**validated_data)
 class foundiSerializer(ModelSerializer):
     class Meta:
         model=found_i
         fields='__all__'
+    def create(self, validated_data):
+        return found_i.objects.create(**validated_data)
 class accountSerializer(ModelSerializer):
     password=serializers.CharField(max_length=128,write_only=True)
     class Meta:
         model=account
         fields='__all__'
+    def create(self, validated_data):
+        return account.objects.create(**validated_data)
 class changeaccountserializer(ModelSerializer):
     class Meta:
         model=account
         fields=('first_name','last_name',
-                'adress','p_number','city','region'
+                'adress','p_number','city','region','email'
                 )
 class changepserializer(ModelSerializer):
     password=serializers.CharField(max_length=128,write_only=True)

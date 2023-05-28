@@ -2,7 +2,8 @@ from rest_framework import permissions
 
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return obj.user==request.user
+        return obj.user_id==request.user.id
 class Istype(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        request.user_type==1
+        print(request.user.user_type_id)
+        return request.user.user_type_id==1
