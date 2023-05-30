@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from drf_multiple_model.pagination import MultipleModelLimitOffsetPagination
 from rest_framework.response import Response
 import json
+from itertools import chain
 import jwt
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -25,6 +26,7 @@ from .models import lost_P,found_P,lost_i,found_i,account,person_type,item_type,
 from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.contrib.auth import authenticate,login,logout
 from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.gis.geoip2 import GeoIP2
 @api_view(['GET'])
 def getRoutes(request):
     routes = [{
@@ -632,3 +634,121 @@ def send_otp(request):
      send_mail('OTP request',o,'<your gmail id>',[email], fail_silently=False, html_message=htmlgen)
      #return HttpResponse(o)
    
+
+
+# ...
+
+
+
+
+
+
+
+
+
+@api_view(['GET'])
+def posts_near_you(request):
+    user = request.user
+    region = None
+    city = None
+
+    if user.is_authenticated:
+        # Get location based on the user's city and region from registration
+        # Replace 'city_field_name' and 'region_field_name' with the actual field names in your User model
+        city = user.city
+        region = user.region
+
+    else:
+        # Get location based on user's current IP address
+        g = GeoIP2()
+        ip = request.META.get('REMOTE_ADDR')
+        location = g.city(ip)
+        region = location['region']
+        city = location['city']
+
+    lost_i_queryset = lost_i.objects.filter(city=city, region=region)
+    lost_P_queryset = lost_P.objects.filter(city=city, region=region)
+    found_i_queryset = found_i.objects.filter(city=city, region=region)
+    found_P_queryset = found_P.objects.filter(city=city, region=region)
+
+    other_lost_i_queryset = lost_i.objects.exclude(city=city).exclude(region=region)
+    other_lost_P_queryset = lost_P.objects.exclude(city=city).exclude(region=region)
+    other_found_i_queryset = found_i.objects.exclude(city=city).exclude(region=region)
+    other_found_P_queryset = found_P.objects.exclude(city=city).exclude(region=region)
+
+    sorted_queryset = sorted(
+        chain(
+            lost_i_queryset,
+            lost_P_queryset,
+            found_i_queryset,
+            found_P_queryset,
+            other_lost_i_queryset,
+            other_lost_P_queryset,
+            other_found_i_queryset,
+            other_found_P_queryset
+        ),
+        key=lambda obj: obj.post_date
+    )
+
+    serializer = None
+
+    if isinstance(sorted_queryset[0], lost_i):
+        serializer = lostiSerializer(sorted_queryset, many=True)
+    elif isinstance(sorted_queryset[0], lost_P):
+        serializer = lostpSerializer(sorted_queryset, many=True)
+    elif isinstance(sorted_queryset[0], found_i):
+        serializer = foundiSerializer(sorted_queryset, many=True)
+    elif isinstance(sorted_queryset[0], found_P):
+        serializer = foundpSerializer(sorted_queryset, many=True)
+
+    if serializer is not None:
+        return Response(serializer.data)
+    else:
+        return Response([])
+
+    
+
+
+
+
+@api_view(['GET'])
+def fetch_all_data(request):
+    region = request.query_params.get('region')
+    city = request.query_params.get('city')
+
+    queryset = chain(
+        lost_i.objects.filter(city=city, region=region),
+        lost_P.objects.filter(city=city, region=region),
+        found_i.objects.filter(city=city, region=region),
+        found_P.objects.filter(city=city, region=region)
+    )
+
+    other_queryset = chain(
+        lost_i.objects.exclude(city=city).exclude(region=region),
+        lost_P.objects.exclude(city=city).exclude(region=region),
+        found_i.objects.exclude(city=city).exclude(region=region),
+        found_P.objects.exclude(city=city).exclude(region=region)
+    )
+
+    sorted_queryset = sorted(
+        chain(queryset, other_queryset),
+        key=lambda obj: obj.post_date
+    )
+
+    serializer = None
+
+    if sorted_queryset:
+        obj = sorted_queryset[0]
+        if isinstance(obj, lost_i):
+            serializer = lostiSerializer(sorted_queryset, many=True)
+        elif isinstance(obj, lost_P):
+            serializer = lostpSerializer(sorted_queryset, many=True)
+        elif isinstance(obj, found_i):
+            serializer = foundiSerializer(sorted_queryset, many=True)
+        elif isinstance(obj, found_P):
+            serializer = foundpSerializer(sorted_queryset, many=True)
+
+    if serializer is not None:
+        return Response(serializer.data)
+    else:
+        return Response([])
