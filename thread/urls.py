@@ -38,6 +38,7 @@ urlpatterns = [
     path('logout/',views.logoutAccount),
     path('register/',views.registeruser),
     path('verify-email/',views.VerifyEmail,name='emailverify'),
+    path("sendvagian/", views.sendveriagian, name="send verification agian"),
     
 
     path('account/',views.getaccount),

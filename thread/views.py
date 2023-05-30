@@ -432,7 +432,20 @@ def getallth(request):
     return Response(result)
 
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def sendveriagian(request):
+    email=request.user.email
+    user=account.objects.get(email=email)
+    token = RefreshToken.for_user(user).access_token
+    current_site=get_current_site(request).domain
+    relativeLink=reverse('emailverify')
+    absurl='http://'+current_site+relativeLink+"?token="+str(token)
+    email_body='hi ' +user.username+' use link below to verify \n'+absurl 
+    data={'email_body':email_body,'to_email':user.email,'e_subject':'verify'}
+    Util.send_email(data)
+        
+    return Response(("email sent successfully"))
 @api_view(['POST'])
 def loginAccount(request):
     #data= request.data
@@ -705,12 +718,6 @@ def posts_near_you(request):
         return Response(serializer.data)
     else:
         return Response([])
-
-    
-
-
-
-
 @api_view(['GET'])
 def fetch_all_data(request):
     region = request.query_params.get('region')
