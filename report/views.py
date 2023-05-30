@@ -23,6 +23,7 @@ from django.contrib.auth import authenticate,login,logout
 from rest_framework.exceptions import AuthenticationFailed
 from .serializer import reportserializer,increasserializer
 from .models import repo,repo_type,reponumber
+from thread.models import account
 # Create your views here.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -42,6 +43,10 @@ def report(request):
         if reponumber.objects.filter(reported=reported).exists():
             repo_n=reponumber.objects.get(reported=reported)
             repo_n.repo_n+=1
+            if repo_n.repo_n>=5:
+                reported=account.objects.get(id=reported)
+                reported.is_active=False
+                reported.save()
             repo_n.save()
         else:
             serializer2=increasserializer(data={'reported':reported})
