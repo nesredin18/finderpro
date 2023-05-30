@@ -99,10 +99,7 @@ class wanted_p(models.Model):
     reason=models.TextField(null=True,blank=True)
     adress=models.CharField(max_length=100,null=True,blank=True)
 
-class matched_p(models.Model):
-    found_id=models.ForeignKey(found_P,on_delete=models.SET_NULL,null=True,blank=True)
-    lost_id=models.ForeignKey(lost_P,on_delete=models.SET_NULL,null=True,blank=True)
-    condition = models.TextField(null=True,blank=True)
+
 class item_type(models.Model):
     type=models.CharField(max_length=100)
     def __str__(self):
@@ -135,7 +132,3 @@ class lost_i(models.Model):
     i_type=models.ForeignKey(item_type,null=True,on_delete=models.SET_NULL)
     lost_date=models.DateTimeField(null=True,blank=True)
     update_date=models.DateTimeField(auto_now=True,null=True,blank=True)
-class matched_i(models.Model):
-    found_id=models.ForeignKey(found_i,on_delete=models.SET_NULL,null=True)
-    lost_id=models.ForeignKey(lost_i,on_delete=models.SET_NULL,null=True)
-    condition = models.TextField(null=True,blank=True)
