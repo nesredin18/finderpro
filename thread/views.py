@@ -561,7 +561,6 @@ def resetpassword(request):
         return Response({'error':'expired'})
     except jwt.exceptions.DecodeError as identifier:
         return Response({'error':'invalid token'})
-
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated,IsOwner])
 def changepassword(request):
@@ -629,36 +628,6 @@ def getThread(request):
     seria4=foundiSerializer(foundi,many=True)
     result=seria1.data+seria2.data+seria3.data+seria4.data
     return Response(result)
-
- 
-  
-def generateOTP() :
-     digits = "0123456789"
-     OTP = ""
-     for i in range(4) :
-         OTP += digits[math.floor(random.random() * 10)]
-     return OTP
-
-def send_otp(request):
-     email=request.user.email
-     print(email)
-     o=generateOTP()
-     htmlgen = '<p>Your OTP is <strong>o</strong></p>'
-     send_mail('OTP request',o,'<your gmail id>',[email], fail_silently=False, html_message=htmlgen)
-     #return HttpResponse(o)
-   
-
-
-# ...
-
-
-
-
-
-
-
-
-
 @api_view(['GET'])
 def posts_near_you(request):
     user = request.user
@@ -672,9 +641,14 @@ def posts_near_you(request):
         region = user.region
 
     else:
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
         # Get location based on user's current IP address
         g = GeoIP2()
-        ip = request.META.get('REMOTE_ADDR')
+        #ip = request.META.get('REMOTE_ADDR')
         location = g.city(ip)
         region = location['region']
         city = location['city']
@@ -719,43 +693,166 @@ def posts_near_you(request):
     else:
         return Response([])
 @api_view(['GET'])
-def fetch_all_data(request):
-    region = request.query_params.get('region')
-    city = request.query_params.get('city')
+@permission_classes([IsAuthenticated])
+def mypost(request):
+    user = request.user
 
-    queryset = chain(
-        lost_i.objects.filter(city=city, region=region),
-        lost_P.objects.filter(city=city, region=region),
-        found_i.objects.filter(city=city, region=region),
-        found_P.objects.filter(city=city, region=region)
-    )
-
-    other_queryset = chain(
-        lost_i.objects.exclude(city=city).exclude(region=region),
-        lost_P.objects.exclude(city=city).exclude(region=region),
-        found_i.objects.exclude(city=city).exclude(region=region),
-        found_P.objects.exclude(city=city).exclude(region=region)
-    )
+    lost_i_queryset = lost_i.objects.filter(user=user)
+    lost_P_queryset = lost_P.objects.filter(user=user)
+    found_i_queryset = found_i.objects.filter(user=user)
+    found_P_queryset = found_P.objects.filter(user=user)
 
     sorted_queryset = sorted(
-        chain(queryset, other_queryset),
+        chain(
+            lost_i_queryset,
+            lost_P_queryset,
+            found_i_queryset,
+            found_P_queryset
+        ),
         key=lambda obj: obj.post_date
     )
 
     serializer = None
 
-    if sorted_queryset:
-        obj = sorted_queryset[0]
-        if isinstance(obj, lost_i):
-            serializer = lostiSerializer(sorted_queryset, many=True)
-        elif isinstance(obj, lost_P):
-            serializer = lostpSerializer(sorted_queryset, many=True)
-        elif isinstance(obj, found_i):
-            serializer = foundiSerializer(sorted_queryset, many=True)
-        elif isinstance(obj, found_P):
-            serializer = foundpSerializer(sorted_queryset, many=True)
+    if isinstance(sorted_queryset[0], lost_i):
+        serializer = lostiSerializer(sorted_queryset, many=True)
+    elif isinstance(sorted_queryset[0], lost_P):
+        serializer = lostpSerializer(sorted_queryset, many=True)
+    elif isinstance(sorted_queryset[0], found_i):
+        serializer = foundiSerializer(sorted_queryset, many=True)
+    elif isinstance(sorted_queryset[0], found_P):
+        serializer = foundpSerializer(sorted_queryset, many=True)
 
     if serializer is not None:
         return Response(serializer.data)
     else:
         return Response([])
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated,IsOwner])
+def updatemypost(request, pk):
+    data= request.data
+    post_type = data['post_type']
+    if post_type == "found person":
+        return updatefoundp(request, pk)
+    elif post_type == "lost person":
+        return updatelostp(request, pk)
+    elif post_type == "found item":
+        return updatefoundi(request, pk)
+    elif post_type == "lost item":
+        return updatelosti(request, pk)
+    else:
+        return Response("Invalid post type")
+    obj=found_P.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
+    #r=request
+    #getlostpid(r,pk)
+    data= request.data
+    foundp=found_P.objects.get(id=pk)
+    serializer= foundpSerializer(foundp, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated,IsOwner])
+def deletemypost(request,pk):
+    data= request.data
+    post_type = data['post_type']
+    if post_type == "found person":
+        return deletefoundp(request, pk)
+    elif post_type == "lost person":
+        return deletelostp(request, pk)
+    elif post_type == "found item":
+        return deletefoundi(request, pk)
+    elif post_type == "lost item":
+        return deletelosti(request, pk)
+    else:
+        return Response("Invalid post type")
+    obj=found_P.objects.get(id=pk)
+    if(request.user.id!=obj.user_id):
+        return Response("you are not allowed")
+    foundp=found_P.objects.get(id=pk)
+    data= foundp
+    serializer= foundpSerializer(data,many=False)
+    foundp.delete()
+    return Response(serializer.data)
+@api_view(['GET'])
+def fetch_all_data(request):
+    lost_i_queryset = lost_i.objects.all()
+    lost_P_queryset = lost_P.objects.all()
+    found_i_queryset = found_i.objects.all()
+    found_P_queryset = found_P.objects.all()
+
+    sorted_queryset = sorted(
+        chain(
+            lost_i_queryset,
+            lost_P_queryset,
+            found_i_queryset,
+            found_P_queryset
+        ),
+        key=lambda obj: getattr(obj, 'post_date') if hasattr(obj, 'post_date') else getattr(obj, 'created_at'),
+        reverse=True
+    )
+
+    data = []
+
+    for obj in sorted_queryset:
+        if isinstance(obj, lost_i):
+            serializer = lostiSerializer(obj)
+        elif isinstance(obj, lost_P):
+            serializer = lostpSerializer(obj)
+        elif isinstance(obj, found_i):
+            serializer = foundiSerializer(obj)
+        elif isinstance(obj, found_P):
+            serializer = foundpSerializer(obj)
+        else:
+            continue
+
+        data.append(serializer.data)
+
+    return Response(data)
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+def generateOTP() :
+     digits = "0123456789"
+     OTP = ""
+     for i in range(4) :
+         OTP += digits[math.floor(random.random() * 10)]
+     return OTP
+
+def send_otp(request):
+     email=request.user.email
+     print(email)
+     o=generateOTP()
+     htmlgen = '<p>Your OTP is <strong>o</strong></p>'
+     send_mail('OTP request',o,'<your gmail id>',[email], fail_silently=False, html_message=htmlgen)
+     #return HttpResponse(o)
+   
+

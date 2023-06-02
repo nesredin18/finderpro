@@ -39,19 +39,19 @@ class person_type(models.Model):
 class lost_P(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
-    first_n=models.CharField(max_length=100,null=True,blank=True)
-    last_n=models.CharField(max_length=100,null=True,blank=True)
+    first_name=models.CharField(max_length=100,null=True,blank=True)
+    last_name=models.CharField(max_length=100,null=True,blank=True)
     age=models.IntegerField(null=True,blank=True)
     height=models.IntegerField(null=True,blank=True)
     gender=models.TextField(null=True,blank=True)
 
     region = models.TextField(null=True,blank=True)
-
+    post_type=models.CharField(max_length=100,null=True,blank=True,default="lost person")
     city = models.TextField(null=True,blank=True)
     cloth=models.TextField(null=True,blank=True)
     mark=models.TextField(null=True,blank=True)
     detail=models.TextField(null=True,blank=True)
-    adress=models.CharField(max_length=100,null=True,blank=True)
+    address=models.CharField(max_length=100,null=True,blank=True)
     p_type=models.ForeignKey(person_type,null=True,on_delete=models.SET_NULL)
     post_date=models.DateTimeField(auto_now_add=True,null=True)
     lost_date=models.DateTimeField(null=True,blank=True)
@@ -59,19 +59,20 @@ class lost_P(models.Model):
 class found_P(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
-    first_n=models.CharField(max_length=100,null=True,blank=True)
-    last_n=models.CharField(max_length=100,null=True,blank=True)
+    first_name=models.CharField(max_length=100,null=True,blank=True)
+    last_name=models.CharField(max_length=100,null=True,blank=True)
     age=models.IntegerField(null=True,blank=True)
     height=models.IntegerField(null=True,blank=True)
     gender=models.TextField(null=True,blank=True)
 
     region = models.TextField(null=True,blank=True)
+    post_type=models.CharField(max_length=100,null=True,blank=True,default="found-person")
 
     city = models.TextField(null=True,blank=True)
     cloth=models.TextField(null=True,blank=True)
     mark=models.TextField(null=True,blank=True)
     detail=models.TextField(null=True,blank=True)
-    adress=models.CharField(max_length=100,null=True,blank=True)
+    address=models.CharField(max_length=100,null=True,blank=True)
     p_type=models.ForeignKey(person_type,null=True,on_delete=models.SET_NULL)
     post_date=models.DateTimeField(auto_now_add=True,null=True)
     lost_date=models.DateTimeField(null=True,blank=True)
@@ -108,7 +109,8 @@ class found_i(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
     #image=models.FileField(_(""), upload_to=None, max_length=100)
     serial_n=models.TextField(null=True,blank=True)
- 
+    post_type=models.CharField(max_length=100,null=True,blank=True,default="found-item")
+
     region = models.TextField(null=True,blank=True)
 
     city = models.TextField(null=True,blank=True)
@@ -124,6 +126,7 @@ class lost_i(models.Model):
     serial_n=models.TextField(null=True,blank=True)
  
     region = models.TextField(null=True,blank=True)
+    post_type=models.CharField(max_length=100,null=True,blank=True,default="lost item")
 
     city = models.TextField(null=True,blank=True)
     detail=models.TextField(null=True,blank=True)

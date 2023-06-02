@@ -49,6 +49,10 @@ urlpatterns = [
     path('reset-password/',views.resetpassword,name='resetpassword'),
     path('change-password/',views.changepassword),
 
+    path('my-post/',views.mypost),
+    path('update-my-post/<str:pk>/',views.updatemypost),
+    path('delete-my-post/<str:pk>/',views.deletemypost),
+
     path('post-near-you/',views.posts_near_you),
     path('fetch-all-data/',views.fetch_all_data),
     

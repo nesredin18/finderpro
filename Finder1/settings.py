@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,7 +48,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'notification',
     'report',
+    'informations',
+    'matcher',
     'drf_multiple_model',
+    'geoip2',
+
 ]
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
@@ -85,7 +90,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Finder1.wsgi.application'
 
-
+GEOIP_PATH =os.path.join('geoip')
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 

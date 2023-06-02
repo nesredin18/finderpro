@@ -3,7 +3,7 @@ from thread.models import account,lost_i,lost_P,found_P,found_i
 
 # Create your models here.
 class notify(models.Model):
-    rec=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='notif_reciever')
+    rec=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='notif_reciever_matcher')
     content=models.TextField()
     date=models.DateField(auto_now_add=True)
 class matched_p(models.Model):
