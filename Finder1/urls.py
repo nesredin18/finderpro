@@ -8,6 +8,7 @@ urlpatterns = [
     path('',include('chat.urls')),
     path('',include('report.urls')),
     path('',include('notification.urls')),
+    path('',include('informations.urls')),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 ]

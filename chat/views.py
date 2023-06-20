@@ -47,8 +47,6 @@ def getmessage(request):
     serializer=getmessageSerializer(data,many=True)
     return Response(serializer.data)
 def getpersonmessage(request):
-    if request.user.is_verfied==False:
-        return Response({'error':'user is not verfied'},status=status.HTTP_400_BAD_REQUEST)
     id=request.user.id
     rec=data['rec']
     data=message.objects.filter(sender=id,rec=rec)

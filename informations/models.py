@@ -27,4 +27,10 @@ class faq(models.Model):
     question=models.TextField(null=True,blank=True,default='question')
     answer=models.TextField(null=True,blank=True,default='answer')
     asker=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='asker')
+class contact(models.Model):
+    question=models.TextField(null=True,blank=True,default='question')
+    asker=models.EmailField(max_length=100,null=True,blank=True,default='email')
+    answer=models.TextField(null=True,blank=True,default='answer')
+    answerer=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='answerer')
+    
 

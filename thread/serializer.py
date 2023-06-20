@@ -81,4 +81,3 @@ class loginSerializer(ModelSerializer):
             raise  AuthenticationFailed('account disabled')
 
         return { 'email':user.email,'username':user.username,'token':user.token}
-        return super().validate(attrs)

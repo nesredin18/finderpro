@@ -418,18 +418,7 @@ def createwantedp(request):
     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
-def getallth(request):
-    lostp=lost_P.objects.all()
-    losti=lost_i.objects.all()
-    foundp=found_P.objects.all()
-    foundi=found_i.objects.all()
-    seria1=lostpSerializer(lostp,many=True)
-    seria2=lostiSerializer(losti,many=True)
-    seria3=foundpSerializer(foundp,many=True)
-    seria4=foundiSerializer(foundi,many=True)
-    result=seria1.data+seria2.data+seria3.data+seria4.data
-    return Response(result)
+
 
 
 @api_view(['GET'])
@@ -601,36 +590,50 @@ def mypost(request):
             found_i_queryset,
             found_P_queryset
         ),
-        key=lambda obj: obj.post_date
+        key=lambda obj: obj.post_date,reverse=True
     )
 
-    serializer = None
+    data = []
 
-    if isinstance(sorted_queryset[0], lost_i):
-        serializer = lostiSerializer(sorted_queryset, many=True)
-    elif isinstance(sorted_queryset[0], lost_P):
-        serializer = lostpSerializer(sorted_queryset, many=True)
-    elif isinstance(sorted_queryset[0], found_i):
-        serializer = foundiSerializer(sorted_queryset, many=True)
-    elif isinstance(sorted_queryset[0], found_P):
-        serializer = foundpSerializer(sorted_queryset, many=True)
+    for obj in sorted_queryset:
+        if isinstance(obj, lost_i):
+            serializer = lostiSerializer(obj)
+        elif isinstance(obj, lost_P):
+            serializer = lostpSerializer(obj)
+        elif isinstance(obj, found_i):
+            serializer = foundiSerializer(obj)
+        elif isinstance(obj, found_P):
+            serializer = foundpSerializer(obj)
+        else:
+            continue
 
-    if serializer is not None:
-        return Response(serializer.data)
-    else:
-        return Response([])
+        data.append(serializer.data)
+
+    return Response(data)
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated,IsOwner])
 def updatemypost(request, pk):
     data= request.data
     post_type = data['post_type']
     if post_type == "found person":
+        obj=found_P.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return updatefoundp(request, pk)
     elif post_type == "lost person":
+        obj=lost_P.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return updatelostp(request, pk)
     elif post_type == "found item":
+        obj=found_i.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return updatefoundi(request, pk)
     elif post_type == "lost item":
+        obj=lost_i.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return updatelosti(request, pk)
     else:
         return Response("Invalid post type")
@@ -651,23 +654,27 @@ def deletemypost(request,pk):
     data= request.data
     post_type = data['post_type']
     if post_type == "found person":
+        obj=found_P.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return deletefoundp(request, pk)
     elif post_type == "lost person":
+        obj=lost_P.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return deletelostp(request, pk)
     elif post_type == "found item":
+        obj=found_i.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return deletefoundi(request, pk)
     elif post_type == "lost item":
+        obj=lost_i.objects.get(id=pk)
+        if(request.user.id!=obj.user_id):
+            return Response("you are not allowed")
         return deletelosti(request, pk)
     else:
         return Response("Invalid post type")
-    obj=found_P.objects.get(id=pk)
-    if(request.user.id!=obj.user_id):
-        return Response("you are not allowed")
-    foundp=found_P.objects.get(id=pk)
-    data= foundp
-    serializer= foundpSerializer(data,many=False)
-    foundp.delete()
-    return Response(serializer.data)
 
 
 
@@ -709,51 +716,7 @@ def fetch_all_data(request):
         data.append(serializer.data)
 
     return Response(data)
-@api_view(['GET'])
-def getThread(request):
-    if request.user.is_authenticated:
-        reg=request.user.region
-        ci=request.user.city
-        lostp=lost_P.objects.filter(region=reg)
-        losti=lost_i.objects.filter(region=reg)
-        foundp=found_P.objects.filter(region=reg)
-        foundi=found_i.objects.filter(region=reg)
-        lostpr=lost_P.objects.filter(city=ci)
-        lostir=lost_i.objects.filter(city=ci)
-        foundpr=found_P.objects.filter(city=ci)
-        foundir=found_i.objects.filter(city=ci)
-        lostpp=lost_P.objects.all().exclude(region=reg).exclude(city=ci)
-        lostip=lost_i.objects.all().exclude(region=reg).exclude(city=ci)
-        foundpp=found_P.objects.all().exclude(region=reg).exclude(city=ci)
-        foundip=found_i.objects.all().exclude(region=reg).exclude(city=ci)
-        seria1=lostpSerializer(lostp,many=True)
-        seria2=lostiSerializer(losti,many=True)
-        seria3=foundpSerializer(foundp,many=True)
-        seria4=foundiSerializer(foundi,many=True)
-        seria5=lostpSerializer(lostpr,many=True)
-        seria6=lostiSerializer(lostir,many=True)
-        seria7=foundpSerializer(foundpr,many=True)
-        seria8=foundiSerializer(foundir,many=True)
-        seria9=lostpSerializer(lostpp,many=True)
-        seria10=lostiSerializer(lostip,many=True)
-        seria11=foundpSerializer(foundpp,many=True)
-        seria12=foundiSerializer(foundip,many=True)
-        result1=seria5.data+seria6.data+seria7.data+seria8.data
-        result2=seria1.data+seria2.data+seria3.data+seria4.data
-        result3=seria9.data+seria10.data+seria11.data+seria12.data
-        result=result1+result2+result3
-        return Response(result)
 
-    lostp=found_i.objects.all()
-    losti=lost_i.objects.all()
-    foundp=found_P.objects.all()
-    foundi=found_i.objects.all()
-    seria1=lostpSerializer(lostp,many=True)
-    seria2=lostiSerializer(losti,many=True)
-    seria3=foundpSerializer(foundp,many=True)
-    seria4=foundiSerializer(foundi,many=True)
-    result=seria1.data+seria2.data+seria3.data+seria4.data
-    return Response(result)
 @api_view(['GET'])
 def posts_near_you(request):
     user = request.user
@@ -800,24 +763,140 @@ def posts_near_you(request):
             other_found_i_queryset,
             other_found_P_queryset
         ),
-        key=lambda obj: obj.post_date
+        key=lambda obj: obj.post_date,reverse=True
+    )
+    data = []
+
+    for obj in sorted_queryset:
+        if isinstance(obj, lost_i):
+            serializer = lostiSerializer(obj)
+        elif isinstance(obj, lost_P):
+            serializer = lostpSerializer(obj)
+        elif isinstance(obj, found_i):
+            serializer = foundiSerializer(obj)
+        elif isinstance(obj, found_P):
+            serializer = foundpSerializer(obj)
+        else:
+            continue
+
+        data.append(serializer.data)
+    return Response(data)
+
+@api_view(['GET'])
+def posts_in_your_region(request):
+    user = request.user
+    region = None
+    city = None
+
+    if user.is_authenticated:
+        # Get location based on the user's city and region from registration
+        # Replace 'city_field_name' and 'region_field_name' with the actual field names in your User model
+        city = user.city
+        region = user.region
+
+    else:
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        # Get location based on user's current IP address
+        g = GeoIP2()
+        #ip = request.META.get('REMOTE_ADDR')
+        location = g.city(ip)
+        region = location['region']
+        city = location['city']
+
+    lost_i_queryset = lost_i.objects.filter(region=region)
+    lost_P_queryset = lost_P.objects.filter(region=region)
+    found_i_queryset = found_i.objects.filter(region=region)
+    found_P_queryset = found_P.objects.filter(region=region)
+
+    sorted_queryset = sorted(
+        chain(
+            lost_i_queryset,
+            lost_P_queryset,
+            found_i_queryset,
+            found_P_queryset
+        ),
+        key=lambda obj: obj.post_date,reverse=True
     )
 
-    serializer = None
+    data = []
 
-    if isinstance(sorted_queryset[0], lost_i):
-        serializer = lostiSerializer(sorted_queryset, many=True)
-    elif isinstance(sorted_queryset[0], lost_P):
-        serializer = lostpSerializer(sorted_queryset, many=True)
-    elif isinstance(sorted_queryset[0], found_i):
-        serializer = foundiSerializer(sorted_queryset, many=True)
-    elif isinstance(sorted_queryset[0], found_P):
-        serializer = foundpSerializer(sorted_queryset, many=True)
+    for obj in sorted_queryset:
+        if isinstance(obj, lost_i):
+            serializer = lostiSerializer(obj)
+        elif isinstance(obj, lost_P):
+            serializer = lostpSerializer(obj)
+        elif isinstance(obj, found_i):
+            serializer = foundiSerializer(obj)
+        elif isinstance(obj, found_P):
+            serializer = foundpSerializer(obj)
+        else:
+            continue
 
-    if serializer is not None:
-        return Response(serializer.data)
+        data.append(serializer.data)
+
+    return Response(data)
+
+@api_view(['GET'])
+def posts_in_your_city(request):
+    user = request.user
+    region = None
+    city = None
+
+    if user.is_authenticated:
+        # Get location based on the user's city and region from registration
+        # Replace 'city_field_name' and 'region_field_name' with the actual field names in your User model
+        city = user.city
+        region = user.region
+
     else:
-        return Response([])
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        # Get location based on user's current IP address
+        g = GeoIP2()
+        #ip = request.META.get('REMOTE_ADDR')
+        location = g.city(ip)
+        region = location['region']
+        city = location['city']
+
+    lost_i_queryset = lost_i.objects.filter(city=city)
+    lost_P_queryset = lost_P.objects.filter(city=city)
+    found_i_queryset = found_i.objects.filter(city=city)
+    found_P_queryset = found_P.objects.filter(city=city)
+
+    sorted_queryset = sorted(
+        chain(
+            lost_i_queryset,
+            lost_P_queryset,
+            found_i_queryset,
+            found_P_queryset
+        ),
+        key=lambda obj: obj.post_date,reverse=True
+    )
+
+    data = []
+
+    for obj in sorted_queryset:
+        if isinstance(obj, lost_i):
+            serializer = lostiSerializer(obj)
+        elif isinstance(obj, lost_P):
+            serializer = lostpSerializer(obj)
+        elif isinstance(obj, found_i):
+            serializer = foundiSerializer(obj)
+        elif isinstance(obj, found_P):
+            serializer = foundpSerializer(obj)
+        else:
+            continue
+
+        data.append(serializer.data)
+
+    return Response(data)
 
 
 
@@ -860,4 +939,61 @@ def send_otp(request):
      send_mail('OTP request',o,'<your gmail id>',[email], fail_silently=False, html_message=htmlgen)
      #return HttpResponse(o)
    
+@api_view(['GET'])
+def getThread(request):
+    if request.user.is_authenticated:
+        reg=request.user.region
+        ci=request.user.city
+        lostp=lost_P.objects.filter(region=reg)
+        losti=lost_i.objects.filter(region=reg)
+        foundp=found_P.objects.filter(region=reg)
+        foundi=found_i.objects.filter(region=reg)
+        lostpr=lost_P.objects.filter(city=ci)
+        lostir=lost_i.objects.filter(city=ci)
+        foundpr=found_P.objects.filter(city=ci)
+        foundir=found_i.objects.filter(city=ci)
+        lostpp=lost_P.objects.all().exclude(region=reg).exclude(city=ci)
+        lostip=lost_i.objects.all().exclude(region=reg).exclude(city=ci)
+        foundpp=found_P.objects.all().exclude(region=reg).exclude(city=ci)
+        foundip=found_i.objects.all().exclude(region=reg).exclude(city=ci)
+        seria1=lostpSerializer(lostp,many=True)
+        seria2=lostiSerializer(losti,many=True)
+        seria3=foundpSerializer(foundp,many=True)
+        seria4=foundiSerializer(foundi,many=True)
+        seria5=lostpSerializer(lostpr,many=True)
+        seria6=lostiSerializer(lostir,many=True)
+        seria7=foundpSerializer(foundpr,many=True)
+        seria8=foundiSerializer(foundir,many=True)
+        seria9=lostpSerializer(lostpp,many=True)
+        seria10=lostiSerializer(lostip,many=True)
+        seria11=foundpSerializer(foundpp,many=True)
+        seria12=foundiSerializer(foundip,many=True)
+        result1=seria5.data+seria6.data+seria7.data+seria8.data
+        result2=seria1.data+seria2.data+seria3.data+seria4.data
+        result3=seria9.data+seria10.data+seria11.data+seria12.data
+        result=result1+result2+result3
+        return Response(result)
 
+    lostp=found_i.objects.all()
+    losti=lost_i.objects.all()
+    foundp=found_P.objects.all()
+    foundi=found_i.objects.all()
+    seria1=lostpSerializer(lostp,many=True)
+    seria2=lostiSerializer(losti,many=True)
+    seria3=foundpSerializer(foundp,many=True)
+    seria4=foundiSerializer(foundi,many=True)
+    result=seria1.data+seria2.data+seria3.data+seria4.data
+    return Response(result)
+
+@api_view(['GET'])
+def getallth(request):
+    lostp=lost_P.objects.all()
+    losti=lost_i.objects.all()
+    foundp=found_P.objects.all()
+    foundi=found_i.objects.all()
+    seria1=lostpSerializer(lostp,many=True)
+    seria2=lostiSerializer(losti,many=True)
+    seria3=foundpSerializer(foundp,many=True)
+    seria4=foundiSerializer(foundi,many=True)
+    result=seria1.data+seria2.data+seria3.data+seria4.data
+    return Response(result)
