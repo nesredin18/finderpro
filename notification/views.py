@@ -21,3 +21,18 @@ from drf_multiple_model.views import FlatMultipleModelAPIView
 from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.contrib.auth import authenticate,login,logout
 from rest_framework.exceptions import AuthenticationFailed
+from thread.models import account
+from notification.models import notify
+from .serializer import getnotificationSerializer
+
+def sendnotification(rec,content):
+    rec=account.objects.get(id=rec)
+    notify.objects.create(rec=rec,content=content)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getnotfication(request):
+    id=request.user.id
+    data=notify.objects.filter(rec=id)
+    serializer=getnotificationSerializer(data,many=True)
+    return Response(serializer.data)

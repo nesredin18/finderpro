@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.mail import send_mail
 import math, random
+from notification.views import sendnotification
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 from rest_framework.decorators import api_view,permission_classes
@@ -21,9 +22,9 @@ from drf_multiple_model.views import FlatMultipleModelAPIView
 from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.contrib.auth import authenticate,login,logout
 from rest_framework.exceptions import AuthenticationFailed
-from .serializer import reportserializer,increasserializer
-from .models import repo,repo_type,reponumber
-from thread.models import account
+from .serializer import reportserializer,increasserializer,itemincreasserializer
+from .models import repo,repo_type,reponumber,reportitemnumber
+from thread.models import account,lost_i,found_i,lost_P,found_P
 # Create your views here.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -40,16 +41,45 @@ def report(request):
     if serializer.is_valid():
         serializer.save()
         reported=data['reported']
+        reported_item_id=data['reported_item']
+        reported_item_type=data['reported_item_type']
+        if reported_item_type=='lost_i' and lost_i.objects.filter(id=reported_item_id).exists():
+            reported_item=lost_i.objects.get(id=reported_item_id)
+        elif reported_item_type=='found_i' and found_i.objects.filter(id=reported_item_id).exists():
+            reported_item=found_i.objects.get(id=reported_item_id)
+        elif reported_item_type=='lost_P' and lost_P.objects.filter(id=reported_item_id).exists():
+            reported_item=lost_P.objects.get(id=reported_item_id)
+        elif reported_item_type=='found_P' and found_P.objects.filter(id=reported_item_id).exists():
+            reported_item=found_P.objects.get(id=reported_item_id)
+        else:
+            return Response({'error':'invalid reported_item_type'},status=status.HTTP_400_BAD_REQUEST)
+        if reportitemnumber.objects.filter(reported_item=reported_item,reported_item_type=reported_item_type).exists():
+            repo_n=reportitemnumber.objects.get(reported_item=reported_item,reported_item_type=reported_item_type)
+            repo_n.reported_item_n+=1
+            repo_n.save()
+            if repo_n.repo_n==3:
+                sendnotification(reported,'your post have been reported 3 times')
+            if repo_n.reported_item_n>=5:
+                reported_item.delete()
+        else:
+            serializer2=itemincreasserializer(data=request.data)
+            if serializer2.is_valid():
+                serializer2.save()
+            else:
+                return Response(serializer2.errors,status=status.HTTP_400_BAD_REQUEST)
+        
         if reponumber.objects.filter(reported=reported).exists():
             repo_n=reponumber.objects.get(reported=reported)
             repo_n.repo_n+=1
+            repo_n.save()
+            if repo_n.repo_n==3:
+                sendnotification(reported,'you have been reported 3 times')
             if repo_n.repo_n>=5:
                 reported=account.objects.get(id=reported)
                 reported.is_active=False
                 reported.save()
-            repo_n.save()
         else:
-            serializer2=increasserializer(data={'reported':reported})
+            serializer2=increasserializer(data=request.data)
             if serializer2.is_valid():
                 serializer2.save()
             else:
