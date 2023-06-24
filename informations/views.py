@@ -21,7 +21,7 @@ from rest_framework import status, permissions
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
 from drf_multiple_model.views import FlatMultipleModelAPIView
-from .serializer import aboutserializer,contactserializer,termserializer,faqserializer,privacyserializer,regionserializer,cityserializer
+from .serializer import aboutserializer,contactserializer,termserializer,faqserializer,privacyserializer,regionserializer,cityserializer,contact_us_serializer
 from.models import about,contact_us,help,privacy,terms,faq,region,city
 from django.contrib.auth import authenticate,login,logout
 
@@ -35,7 +35,7 @@ def getabout(request):
 @api_view(['GET'])
 def getcontact(request):
     lostp=contact_us.objects.all()
-    serializer=contactserializer(lostp, many=True)
+    serializer=contact_us_serializer(lostp, many=True)
     return Response(serializer.data)
 @api_view(['GET'])
 def getprivacy(request):

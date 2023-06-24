@@ -43,11 +43,11 @@ def report(request):
         reported=data['reported']
         reported_item_id=data['reported_item']
         reported_item_type=data['reported_item_type']
-        if reported_item_type=='lost-item' and lost_i.objects.filter(id=reported_item_id).exists():
+        if reported_item_type=='lost item' and lost_i.objects.filter(id=reported_item_id).exists():
             reported_item=lost_i.objects.get(id=reported_item_id)
         elif reported_item_type=='found-item' and found_i.objects.filter(id=reported_item_id).exists():
             reported_item=found_i.objects.get(id=reported_item_id)
-        elif reported_item_type=='lost-person' and lost_P.objects.filter(id=reported_item_id).exists():
+        elif reported_item_type=='lost person' and lost_P.objects.filter(id=reported_item_id).exists():
             reported_item=lost_P.objects.get(id=reported_item_id)
         elif reported_item_type=='found-person' and found_P.objects.filter(id=reported_item_id).exists():
             reported_item=found_P.objects.get(id=reported_item_id)

@@ -9,32 +9,11 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 from rest_framework.response import Response
 from .models import matched_i,matched_p
+import cv2
+import face_recognition
+import numpy as np
+from PIL import Image
 
-@api_view(['POST'])
-def compare_images(request):
-    image1 = request.FILES.get('image1')
-    image2 = request.FILES.get('image2')
-
-    if not image1 or not image2:
-        return JsonResponse({'error': 'Please provide both image1 and image2 files.'}, status=400)
-    
-    image1_data = face_recognition.load_image_file(image1)
-    image2_data = face_recognition.load_image_file(image2)
-    
-    face_encodings1 = face_recognition.face_encodings(image1_data)
-    face_encodings2 = face_recognition.face_encodings(image2_data)
-    
-    if len(face_encodings1) == 0 or len(face_encodings2) == 0:
-        return JsonResponse({'error': 'No faces found in one or both images.'}, status=400)
-    
-    face_distance = face_recognition.face_distance(face_encodings1, face_encodings2)
-    similarity = 1 - face_distance
-    
-    response = {
-        'similarity': float(similarity[0]) * 100
-    }
-    
-    return JsonResponse(response)
 
 def fuzzy_match(string1, string2):
     if string1 and string2:
@@ -45,26 +24,44 @@ def fuzzy_match(string1, string2):
 def match_items():
     matches = []
     for lost_item in lost_i.objects.all():
+
         possible_matches = found_i.objects.filter(
             Q(region=lost_item.region) |
             Q(i_type=lost_item.i_type)
             )  
         
         for found_item in possible_matches:
-            detail_similarity = fuzzy_match(lost_item.detail, found_item.detail)
-            serial_similarity = fuzzy_match(lost_item.serial_n, found_item.serial_n)
-            address_similarity = fuzzy_match(lost_item.adress, found_item.adress)
-            city_similarity = fuzzy_match(lost_item.city, found_item.city)
-            count=(detail_similarity+serial_similarity+address_similarity+city_similarity)/4
-            
+            sum=0
+            divider=0
+            if(lost_item.detail and found_item.detail):
+                detail_similarity = fuzzy_match(lost_item.detail, found_item.detail)
+                divider+=detail_similarity
+                sum+=1
+            if(lost_item.serial_n and found_item.serial_n):
+                serial_similarity = fuzzy_match(lost_item.serial_n, found_item.serial_n)
+                divider+=serial_similarity
+                sum+=1
+            if(lost_item.adress and found_item.adress):
+                address_similarity = fuzzy_match(lost_item.adress, found_item.adress)
+                divider+=address_similarity
+                sum+=1
+            if(lost_item.city and found_item.city):
+                city_similarity = fuzzy_match(lost_item.city, found_item.city)
+                divider+=city_similarity
+                sum+=1
+            if(lost_item.lost_date and found_item.lost_date):
+                date_difference = abs((found_item.lost_date - lost_item.lost_date).days)
+                sum+=1
+                if(date_difference<=30):
+                    divider+=1
+            print(lost_item)
+            print(found_item)
+            print(divider)
+            print(sum)
             # Consider matches where the details, serial number, and address are 80% similar
-            if count >= 0.7:
-                if lost_item.lost_date and found_item.lost_date:
-                    # Consider matches where the found_date is within 30 days of the lost_date
-                    date_difference = abs((found_item.lost_date - lost_item.lost_date).days)
-                    if date_difference <= 30:
-                        # You have a match, add to matches list
-                        matches.append((lost_item, found_item))
+            if divider/sum >= 0.7:
+                # You have a match, add to matches list
+                matches.append((lost_item, found_item))
     return matches
 
 def match_person():
@@ -79,6 +76,17 @@ def match_person():
         for found_person in possible_matches:
             divider=0
             sum=0
+            image_similarity=0
+            if(lost_person.image_url and found_person.image_url):
+                image_similarity = compare_faces(lost_person.image_url, found_person.image_url)
+                if(type(image_similarity)==str):
+                    continue
+                if(image_similarity>=60):
+                    matches.append((lost_person, found_person))
+                    continue
+                else:
+                    divider+=image_similarity/100
+                    sum+=1
             if(lost_person.first_name and found_person.first_name):
                 first_name_similarity = fuzzy_match(lost_person.first_name, found_person.first_name)
                 divider+=first_name_similarity
@@ -125,6 +133,9 @@ def match_person():
                 sum+=1
             print(divider)
             print(sum)
+            if(image_similarity>50 and sum<4):
+                matches.append((lost_person, found_person))
+                continue
             # Consider matches where the attributes have a certain similarity threshold
             if (divider/sum>=0.7):
                         # You have a match, add to matches list
@@ -138,7 +149,9 @@ def match_person():
 def match_items_view(request):
     matches = match_items()  # No need to pass request._request here
     for lost_item, found_item in matches:
-        matched_i.objects.create(lost_id=lost_item,found_id=found_item)
+        # get_or_create() checks if the entry already exists. If not, it creates a new one.
+        _, created = matched_i.objects.get_or_create(lost_id=lost_item, found_id=found_item)
+
     matches_data = [{'lost_item': lost_item.id, 'found_item': found_item.id} for lost_item, found_item in matches]
     return Response(matches_data)
 
@@ -146,7 +159,9 @@ def match_items_view(request):
 def match_person_view(request):
     matches = match_person()  # No need to pass request._request here
     for lost_person, found_person in matches:
-        matched_p.objects.create(lost_id=lost_person,found_id=found_person)
+        # get_or_create() checks if the entry already exists. If not, it creates a new one.
+        _, created = matched_p.objects.get_or_create(lost_id=lost_person, found_id=found_person)
+
     matches_data = [{'lost_person': lost_person.id, 'found_person': found_person.id} for lost_person, found_person in matches]
     return Response(matches_data)
 
@@ -159,11 +174,17 @@ def update_matched(request):
     matches_data = [{'lost_item': lost_item.id, 'found_item': found_item.id} for lost_item, found_item in matches]
     return Response(matches_data)
 
+def detect_face(image_np):
+    # Convert the image to grayscale
+    gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
 
-import cv2
-import face_recognition
-import numpy as np
-from PIL import Image
+    # Load the haar cascade for face detection
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+    # Detect faces in the image using OpenCV
+    faces = face_cascade.detectMultiScale(gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    return faces
 
 def compare_faces(image1_file, image2_file):
     # Load the images using PIL
@@ -202,13 +223,9 @@ def compare_faces(image1_file, image2_file):
     threshold = 50  # Adjust this threshold based on your requirements
     if any(similarity_percentage >= threshold):
         max_similarity = max(similarity_percentage)
-        return "Same person with a similarity of {:.2f}%".format(max_similarity)
+        return max_similarity
     else:
-        return "Different persons"
-
-# Provide the paths to the two images you want to compare
-image1_path = "Dv.jpg"
-image2_path = "Webcam_2.jpeg"
+        return 0
 
 # Compare the images
 #result = compare_faces(image1_path, image2_path)

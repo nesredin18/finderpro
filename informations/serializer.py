@@ -10,7 +10,7 @@ class aboutserializer(ModelSerializer):
         fields='__all__'
     def create(self, validated_data):
         return about.objects.create(**validated_data)
-class contactserializer(ModelSerializer):
+class contact_us_serializer(ModelSerializer):
     class Meta:
         model=contact_us
         fields='__all__'

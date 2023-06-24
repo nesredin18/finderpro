@@ -23,6 +23,7 @@ from django.contrib.auth import authenticate,login,logout
 from rest_framework.exceptions import AuthenticationFailed
 from .serializer import sendserializer, getmessageSerializer
 from .models import message
+from django.db.models import Q
 # Create your views here.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -43,10 +44,11 @@ def sendmessage(request):
 @permission_classes([IsAuthenticated])
 def getmessage(request):
     id=request.user.id
-    data=message.objects.filter(sender=id)
+    data=message.objects.filter(Q(sender=id)|Q(rec=id))
     serializer=getmessageSerializer(data,many=True)
     return Response(serializer.data)
 def getpersonmessage(request):
+    data=request.data
     id=request.user.id
     rec=data['rec']
     data=message.objects.filter(sender=id,rec=rec)
