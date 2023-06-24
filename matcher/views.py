@@ -144,6 +144,14 @@ def match_items_view(request):
     matches_data = [{'lost_item': lost_item.id, 'found_item': found_item.id} for lost_item, found_item in matches]
     return Response(matches_data)
 
+@api_view(['GET'])
+def match_person_view(request):
+    matches = match_person()  # No need to pass request._request here
+    for lost_person, found_person in matches:
+        matched_i.objects.create(lost_id=lost_person,found_id=found_person)
+    matches_data = [{'lost_item': lost_item.id, 'found_item': found_item.id} for lost_item, found_item in matches]
+    return Response(matches_data)
+
 
 @api_view(['GET'])
 def update_matched(request):
