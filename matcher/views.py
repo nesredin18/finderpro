@@ -9,10 +9,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 from rest_framework.response import Response
 from .models import matched_i,matched_p
-@api_view(['GET'])
-def health_check(request):
-    response =send_images_for_comparison('/home/par/Desktop/finder/mediafiles/images/Dv.jpg', '/home/par/Desktop/finder/mediafiles/images/Dv.jpg')
-    return JsonResponse(response)
+
 @api_view(['POST'])
 def compare_images(request):
     image1 = request.FILES.get('image1')
@@ -126,7 +123,8 @@ def match_person():
                 age_difference = lost_person.age/found_person.age
                 divider+=age_difference
                 sum+=1
-            
+            print(divider)
+            print(sum)
             # Consider matches where the attributes have a certain similarity threshold
             if (divider/sum>=0.7):
                         # You have a match, add to matches list
@@ -148,8 +146,8 @@ def match_items_view(request):
 def match_person_view(request):
     matches = match_person()  # No need to pass request._request here
     for lost_person, found_person in matches:
-        matched_i.objects.create(lost_id=lost_person,found_id=found_person)
-    matches_data = [{'lost_item': lost_item.id, 'found_item': found_item.id} for lost_item, found_item in matches]
+        matched_p.objects.create(lost_id=lost_person,found_id=found_person)
+    matches_data = [{'lost_person': lost_person.id, 'found_person': found_person.id} for lost_person, found_person in matches]
     return Response(matches_data)
 
 
@@ -161,3 +159,75 @@ def update_matched(request):
     matches_data = [{'lost_item': lost_item.id, 'found_item': found_item.id} for lost_item, found_item in matches]
     return Response(matches_data)
 
+
+import cv2
+import face_recognition
+import numpy as np
+from PIL import Image
+
+def compare_faces(image1_file, image2_file):
+    # Load the images using PIL
+    image1 = Image.open(image1_file)
+    image2 = Image.open(image2_file)
+
+    # Convert the images to numpy array
+    image1_np = np.array(image1)
+    image2_np = np.array(image2)
+
+    # Detect faces in the images using face_recognition
+    face_locations1 = face_recognition.face_locations(image1_np)
+    face_locations2 = face_recognition.face_locations(image2_np)
+
+    if len(face_locations1) == 0:
+        return "No face found in image 1"
+
+    if len(face_locations2) == 0:
+        return "No face found in image 2"
+
+    # Extract face encodings from the images
+    face1_encodings = face_recognition.face_encodings(image1_np, face_locations1)
+    face2_encodings = face_recognition.face_encodings(image2_np, face_locations2)
+
+    # Convert the face encodings to NumPy arrays
+    face1_encodings = np.array(face1_encodings)
+    face2_encodings = np.array(face2_encodings)
+
+    # Compare the face encodings
+    face_distances = face_recognition.face_distance(face1_encodings, face2_encodings)
+
+    # Calculate the similarity percentage
+    similarity_percentage = (1 - face_distances) * 100
+
+    # Check if there is any match above a threshold
+    threshold = 50  # Adjust this threshold based on your requirements
+    if any(similarity_percentage >= threshold):
+        max_similarity = max(similarity_percentage)
+        return "Same person with a similarity of {:.2f}%".format(max_similarity)
+    else:
+        return "Different persons"
+
+# Provide the paths to the two images you want to compare
+image1_path = "Dv.jpg"
+image2_path = "Webcam_2.jpeg"
+
+# Compare the images
+#result = compare_faces(image1_path, image2_path)
+
+#print(result)
+@api_view(['POST'])
+def compare_faces_view(request):
+    # Get the image files from the request
+    im=lost_P.objects.get(id=1)
+    im2=lost_P.objects.get(id=2)
+    image1_file = im.image_url
+    image2_file = im2.image_url
+
+    # Check if both images were provided
+    if image1_file is None or image2_file is None:
+        return Response("Both images must be provided", status=400)
+
+    # Compare the faces in the images
+    compare_result = compare_faces(image1_file, image2_file)
+
+    # Return the result
+    return Response(compare_result)
