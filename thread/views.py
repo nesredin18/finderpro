@@ -27,6 +27,9 @@ from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.contrib.auth import authenticate,login,logout
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.gis.geoip2 import GeoIP2
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.db.models import Q
+from django.db.models import Sum, Case, When, Value, IntegerField
 @api_view(['GET'])
 def getRoutes(request):
     routes = [{
@@ -182,6 +185,7 @@ def getlostpid(request,pk):
 @api_view(['GET'])
 def getlostp(request):
     lostp=lost_P.objects.all()
+    parser_classes = (MultiPartParser, FormParser)
     serializer=lostpSerializer(lostp, many=True)
     return Response(serializer.data)
 @api_view(["DELETE"])
@@ -196,7 +200,7 @@ def deletelostp(request,pk):
     lostp.delete()
     return Response("succusfully deleted")
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated,IsOwner])
+
 def updatelostp(request, pk):
     obj=lost_P.objects.get(id=pk)
     if(request.user.id!=obj.user_id):
@@ -215,6 +219,7 @@ def updatelostp(request, pk):
 def createlostp(request):
     data=request.data
     data['user']=request.user.id
+    parser_classes = (MultiPartParser, FormParser)
     serializer=lostpSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -619,22 +624,22 @@ def updatemypost(request, pk):
         obj=found_P.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return updatefoundp(request, pk)
+        return updatefoundp(request._request, pk)
     elif post_type == "lost person":
         obj=lost_P.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return updatelostp(request, pk)
+        return updatelostp(request._request, pk)
     elif post_type == "found item":
         obj=found_i.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return updatefoundi(request, pk)
+        return updatefoundi(request._request, pk)
     elif post_type == "lost item":
         obj=lost_i.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return updatelosti(request, pk)
+        return updatelosti(request._request, pk)
     else:
         return Response("Invalid post type")
     obj=found_P.objects.get(id=pk)
@@ -657,26 +662,24 @@ def deletemypost(request,pk):
         obj=found_P.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return deletefoundp(request, pk)
+        return deletefoundp(request._request, pk)
     elif post_type == "lost person":
         obj=lost_P.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return deletelostp(request, pk)
+        return deletelostp(request._request, pk)
     elif post_type == "found item":
         obj=found_i.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return deletefoundi(request, pk)
+        return deletefoundi(request._request, pk)
     elif post_type == "lost item":
         obj=lost_i.objects.get(id=pk)
         if(request.user.id!=obj.user_id):
             return Response("you are not allowed")
-        return deletelosti(request, pk)
+        return deletelosti(request._request, pk)
     else:
         return Response("Invalid post type")
-
-
 
 
 
@@ -901,7 +904,135 @@ def posts_in_your_city(request):
 
 
 
+
+
+@api_view(['GET'])
+def search_products(request):
+    query = request.GET.get('q', '')  # Get the search query from the URL parameter 'q'
+
+    # Split the query into individual search terms
+    search_terms = query.split()
+
+    # Define the search conditions for each table
+    found_p_conditions = []
+    found_i_conditions = []
+    lost_p_conditions = []
+    lost_i_conditions = []
+
+    # Populate the search conditions for each table based on the search terms
+    for term in search_terms:
+        found_p_conditions.extend([
+            Q(first_name__icontains=term),
+            Q(last_name__icontains=term),
+            Q(age__icontains=term),
+            Q(height__icontains=term),
+            Q(gender__icontains=term),
+            Q(region__icontains=term),
+            Q(city__icontains=term),
+            Q(cloth__icontains=term),
+            Q(mark__icontains=term),
+            Q(detail__icontains=term),
+            Q(address__icontains=term),
+        ])
+        found_i_conditions.extend([
+            Q(region__icontains=term),
+            Q(city__icontains=term),
+            Q(detail__icontains=term),
+            Q(post_date__icontains=term),
+            Q(serial_n__icontains=term),
+            Q(adress__icontains=term),
+        ])
+        lost_p_conditions.extend([
+            Q(first_name__icontains=term),
+            Q(last_name__icontains=term),
+            Q(age__icontains=term),
+            Q(height__icontains=term),
+            Q(gender__icontains=term),
+            Q(region__icontains=term),
+            Q(city__icontains=term),
+            Q(cloth__icontains=term),
+            Q(mark__icontains=term),
+            Q(detail__icontains=term),
+            Q(address__icontains=term),
+        ])
+        lost_i_conditions.extend([
+            Q(region__icontains=term),
+            Q(city__icontains=term),
+            Q(detail__icontains=term),
+            Q(post_date__icontains=term),
+            Q(serial_n__icontains=term),
+            Q(adress__icontains=term),
+        ])
+
+    # Combine the conditions using OR operator for each table
+    found_p_query_filter = Q()
+    found_i_query_filter = Q()
+    lost_p_query_filter = Q()
+    lost_i_query_filter = Q()
+    
+    for condition in found_p_conditions:
+        found_p_query_filter |= condition
+    for condition in found_i_conditions:
+        found_i_query_filter |= condition
+    for condition in lost_p_conditions:
+        lost_p_query_filter |= condition
+    for condition in lost_i_conditions:
+        lost_i_query_filter |= condition
+
+    # Perform the search on each table
+    found_p_results = found_P.objects.filter(found_p_query_filter).annotate(
+        num_matches=Sum(
+            Case(When(found_p_query_filter, then=Value(1)), default=Value(0), output_field=IntegerField())
+        )
+    )
+    found_i_results = found_i.objects.filter(found_i_query_filter).annotate(
+        num_matches=Sum(
+            Case(When(found_i_query_filter, then=Value(1)), default=Value(0), output_field=IntegerField())
+        )
+    )
+    lost_p_results = lost_P.objects.filter(lost_p_query_filter).annotate(
+        num_matches=Sum(
+            Case(When(lost_p_query_filter, then=Value(1)), default=Value(0), output_field=IntegerField())
+        )
+    )
+    lost_i_results = lost_i.objects.filter(lost_i_query_filter).annotate(
+        num_matches=Sum(
+            Case(When(lost_i_query_filter, then=Value(1)), default=Value(0), output_field=IntegerField())
+        )
+    )
+
+    # Concatenate the results from all tables
+    all_results = list(found_p_results) + list(found_i_results) + list(lost_p_results) + list(lost_i_results)
+
+    # Sort the results by the number of matching terms in descending order
+    sorted_results = sorted(all_results, key=lambda x: x.num_matches, reverse=True)
+
+    # Serialize the sorted results using respective serializers
+    data = []
+
+    for obj in sorted_results:
+        if isinstance(obj, lost_i):
+            serializer = lostiSerializer(obj)
+        elif isinstance(obj, lost_P):
+            serializer = lostpSerializer(obj)
+        elif isinstance(obj, found_i):
+            serializer = foundiSerializer(obj)
+        elif isinstance(obj, found_P):
+            serializer = foundpSerializer(obj)
+        else:
+            continue
+
+        data.append(serializer.data)
+
+    return Response(data)
+
+
+
  
+
+
+
+
 
 
 

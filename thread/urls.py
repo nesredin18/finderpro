@@ -52,6 +52,8 @@ urlpatterns = [
     path('my-post/',views.mypost),
     path('update-my-post/<str:pk>/',views.updatemypost),
     path('delete-my-post/<str:pk>/',views.deletemypost),
+    path('search-all/',views.search_products),
+
 
     path('post-near-you/',views.posts_near_you),
     path('fetch-all-data/',views.fetch_all_data),

@@ -5,12 +5,25 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
 # Create your models here.
+def uploadlosti_to(instance, filename):
+    return 'images/lostitem{filename}'.format(filename=filename)
+def upload_to(instance, filename):
+    return 'images/lostperson{filename}'.format(filename=filename)
+def uploadfoundi_to(instance, filename):
+    return 'images/founditem{filename}'.format(filename=filename)
+def uploadfoundp_to(instance, filename):
+    return 'images/foundperson{filename}'.format(filename=filename)
+def uploadaccount_to(instance, filename):
+    return 'images/account{filename}'.format(filename=filename)
+def uploadwantedp_to(instance, filename):
+    return 'images/wantedp{filename}'.format(filename=filename)
 class user_type(models.Model):
     type=models.CharField(max_length=100)
     def __str__(self):
         return self.type
 class account(AbstractUser):
     email=models.EmailField(unique=True,null=True)
+    image_url = models.ImageField(upload_to=uploadaccount_to, blank=True, null=True)
     p_number=models.IntegerField(null=True)
     adress=models.CharField(max_length=100,blank=True,null=True)
     user_type=models.ForeignKey(user_type,null=True, on_delete=models.SET_NULL)
@@ -38,7 +51,7 @@ class person_type(models.Model):
         return self.type
 class lost_P(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
-    #image=models.FileField(_(""), upload_to=None, max_length=100)
+    image_url = models.ImageField(upload_to=upload_to, blank=True, null=True)
     first_name=models.CharField(max_length=100,null=True,blank=True)
     last_name=models.CharField(max_length=100,null=True,blank=True)
     age=models.IntegerField(null=True,blank=True)
@@ -58,7 +71,7 @@ class lost_P(models.Model):
     update_date=models.DateTimeField(auto_now=True,null=True)
 class found_P(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
-    #image=models.FileField(_(""), upload_to=None, max_length=100)
+    image_url = models.ImageField(upload_to=uploadfoundp_to, blank=True, null=True)
     first_name=models.CharField(max_length=100,null=True,blank=True)
     last_name=models.CharField(max_length=100,null=True,blank=True)
     age=models.IntegerField(null=True,blank=True)
@@ -79,7 +92,7 @@ class found_P(models.Model):
     update_date=models.DateTimeField(auto_now=True,null=True)
 class wanted_p(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
-    #image=models.FileField(_(""), upload_to=None, max_length=100)
+    image_url = models.ImageField(upload_to=uploadwantedp_to, blank=True, null=True)
     first_n=models.CharField(max_length=100,null=True,blank=True)
     last_n=models.CharField(max_length=100,null=True,blank=True)
     age=models.IntegerField(null=True,blank=True)
@@ -107,7 +120,7 @@ class item_type(models.Model):
         return self.type
 class found_i(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
-    #image=models.FileField(_(""), upload_to=None, max_length=100)
+    image_url = models.ImageField(upload_to=uploadfoundi_to, blank=True, null=True)
     serial_n=models.TextField(null=True,blank=True)
     post_type=models.CharField(max_length=100,null=True,blank=True,default="found-item")
 
@@ -122,7 +135,7 @@ class found_i(models.Model):
     update_date=models.DateTimeField(auto_now=True,null=True,blank=True)
 class lost_i(models.Model):
     user=models.ForeignKey(account,null=True,on_delete=models.SET_NULL)
-    #image=models.FileField(_(""), upload_to=None, max_length=100)
+    image_url = models.ImageField(upload_to=uploadlosti_to, blank=True, null=True)
     serial_n=models.TextField(null=True,blank=True)
  
     region = models.TextField(null=True,blank=True)

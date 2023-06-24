@@ -5,10 +5,10 @@ from thread.models import account
 class repo_type(models.Model):
     type=models.CharField(max_length=100)
 class repo(models.Model):
-    reporter=models.ForeignKey(account, null=True,on_delete=models.SET_NULL,related_name='offended_reporter')
-    reported=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='offender_reported')
-    r_type= models.ForeignKey(repo_type,null=True, on_delete=models.SET_NULL)
-    content=models.TextField()
+    reporter=models.ForeignKey(account, null=True,on_delete=models.SET_NULL,related_name='offended_reporter',blank=True)
+    reported=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='offender_reported',blank=True)
+    r_type= models.ForeignKey(repo_type,null=True, on_delete=models.SET_NULL,blank=True)
+    content=models.TextField(null=True,blank=True)
     date=models.DateField(auto_now_add=True)
 class reponumber(models.Model):
     reported=models.ForeignKey(account,null=True, on_delete=models.SET_NULL,related_name='count_reported')
