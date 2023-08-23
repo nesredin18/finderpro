@@ -166,6 +166,6 @@ EMAIL_HOST_USER = 'negusiesemira@gmail.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587 
 EMAIL_USE_TLS = True 
-EMAIL_HOST_PASSWORD = 'aolpbkpbqtlhojvz'
+EMAIL_HOST_PASSWORD = 'ialaolpbkpbqtlhojvzlia'
 
 CORS_ALLOW_ALL_ORIGINS=True
